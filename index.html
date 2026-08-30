@@ -301,11 +301,13 @@
     display:flex;align-items:center;justify-content:center;padding:20px;
   }
   #ikdc-modal.hidden{display:none;}
-  .ikdc-section{margin-bottom:8px;}
-  .ikdc-section h3{font-size:14px;color:var(--navy);margin:14px 0 2px;}
-  .ikdc-q{margin:14px 0;}
-  .ikdc-q-label{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;}
-  .ikdc-opt{border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:6px;font-size:12.5px;color:var(--text);cursor:pointer;}
+  .ikdc-section{margin-bottom:4px;}
+  .ikdc-section h3{font-size:14.5px;color:var(--navy);margin:20px 0 3px;padding-top:14px;border-top:1px solid var(--border);}
+  .ikdc-section:first-child h3{margin-top:6px;padding-top:0;border-top:none;}
+  .ikdc-q{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 14px 12px;margin:12px 0;}
+  .ikdc-q.missing{border-color:var(--danger);box-shadow:0 0 0 2px rgba(179,38,30,0.15);}
+  .ikdc-q-label{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.4;}
+  .ikdc-opt{border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:13px;color:var(--text);cursor:pointer;line-height:1.4;}
   .ikdc-opt.selected{border-color:var(--teal);background:#EAF4EE;font-weight:700;}
 
   /* ---------- Add to Home Screen prompt ---------- */
@@ -553,7 +555,7 @@
 <!-- IKDC questionnaire modal -->
 <div id="ikdc-modal" class="hidden">
   <div class="onboard-card" style="max-width:440px;">
-    <h1 data-t="ikdcTitle">Knee Outcome Survey (IKDC)</h1>
+    <h1 data-t="ikdcTitle">Knee Recovery Survey</h1>
     <p class="lead" data-t="ikdcIntro">A short questionnaire your care team uses to track your knee's recovery.</p>
     <div id="ikdc-modal-body"></div>
     <button class="primary-btn" onclick="submitIkdcForm()" data-t="ikdcSubmitBtn">Submit Survey</button>
@@ -591,7 +593,7 @@ en: {
   ],
   surgeonLabel:"Your surgeon",
   resetBtn:"Reset App Data",
-  resetConfirm:"This will erase your surgery details, exercise progress, measurements, and IKDC surveys on this device. This can't be undone. Continue?",
+  resetConfirm:"This will erase your surgery details, exercise progress, measurements, and recovery surveys on this device. This can't be undone. Continue?",
   hnPrefix:"HN: ",
   tabHome:"Home", tabCare:"Care", tabExercises:"Exercises", tabProgress:"Progress", tabResources:"Resources", tabSOS:"Alert",
   sosTitle:"When to Get Help", sosSub:"If you notice any of the signs below, contact your care team right away.",
@@ -780,13 +782,13 @@ en: {
   progressDisclaimer:"These checks support the conversation with your surgeon and physiotherapist. They do not replace their assessment, and passing them is not by itself permission to return to sport.",
 
   /* ---- IKDC Subjective Knee Evaluation ---- */
-  ikdcTitle:"Knee Outcome Survey (IKDC)",
+  ikdcTitle:"Knee Recovery Survey",
   ikdcIntro:"A short questionnaire your care team uses to track your knee's recovery. It's asked at 2, 6, 12, 25 and 52 weeks after surgery.",
   ikdcOverdueNote:"This survey is overdue — please complete it when you can.",
   ikdcOpenBtn:"Start Survey",
   ikdcSubmitBtn:"Submit Survey",
   ikdcCancelBtn:"Cancel",
-  ikdcHistoryTitle:"Your IKDC Score Over Time",
+  ikdcHistoryTitle:"Your Knee Recovery Score Over Time",
   ikdcValidation:"Please answer every question before submitting.",
   ikdcTimepointLabels:{ w2:"2-week", w6:"6-week", w12:"12-week", w25:"25-week", w52:"52-week (1-year)" },
   ikdcSectionSymptoms:"Symptoms",
@@ -959,7 +961,7 @@ en: {
     ]},
     { icon:"📅", title:"Follow-up Visits", items:[
       "Usually around 10–14 days for wound review, then at intervals your surgeon will set.",
-      "Bring the app with you — your IKDC surveys and measurements are useful at each visit.",
+      "Bring the app with you — your recovery surveys and measurements are useful at each visit.",
       "Bring any questions about work, driving, travel or sport with you rather than guessing between visits."
     ]}
   ],
@@ -1011,7 +1013,7 @@ th: {
   ],
   surgeonLabel:"ศัลยแพทย์ของท่าน",
   resetBtn:"รีเซ็ตข้อมูลแอป",
-  resetConfirm:"การดำเนินการนี้จะลบข้อมูลการผ่าตัด ความคืบหน้าท่าบริหาร ผลการวัด และแบบประเมิน IKDC ทั้งหมดบนอุปกรณ์นี้ และไม่สามารถย้อนกลับได้ ต้องการดำเนินการต่อหรือไม่?",
+  resetConfirm:"การดำเนินการนี้จะลบข้อมูลการผ่าตัด ความคืบหน้าท่าบริหาร ผลการวัด และแบบสำรวจการฟื้นตัวทั้งหมดบนอุปกรณ์นี้ และไม่สามารถย้อนกลับได้ ต้องการดำเนินการต่อหรือไม่?",
   hnPrefix:"HN: ",
   tabHome:"หน้าแรก", tabCare:"การดูแล", tabExercises:"ท่าบริหาร", tabProgress:"ความก้าวหน้า", tabResources:"แหล่งข้อมูล", tabSOS:"แจ้งเตือน",
   sosTitle:"เมื่อใดควรขอความช่วยเหลือ", sosSub:"หากพบอาการต่อไปนี้ ให้ติดต่อทีมผู้ดูแลทันที",
@@ -1190,13 +1192,13 @@ th: {
   progressDisclaimer:"เกณฑ์เหล่านี้ใช้ประกอบการปรึกษากับแพทย์ผู้ผ่าตัดและนักกายภาพบำบัด ไม่ใช่การประเมินแทน และการผ่านเกณฑ์เพียงอย่างเดียวไม่ถือเป็นการอนุญาตให้กลับไปเล่นกีฬา",
 
   /* ---- แบบประเมินเข่า IKDC ---- */
-  ikdcTitle:"แบบประเมินผลลัพธ์ของเข่า (IKDC)",
+  ikdcTitle:"แบบสำรวจการฟื้นตัวของเข่า",
   ikdcIntro:"แบบสอบถามสั้น ๆ ที่ทีมผู้ดูแลใช้ติดตามการฟื้นตัวของเข่าท่าน โดยจะให้ทำที่ 2, 6, 12, 25 และ 52 สัปดาห์หลังผ่าตัด",
   ikdcOverdueNote:"แบบประเมินนี้เลยกำหนดแล้ว กรุณาทำเมื่อสะดวก",
   ikdcOpenBtn:"เริ่มทำแบบประเมิน",
   ikdcSubmitBtn:"ส่งแบบประเมิน",
   ikdcCancelBtn:"ยกเลิก",
-  ikdcHistoryTitle:"คะแนน IKDC ตามช่วงเวลา",
+  ikdcHistoryTitle:"คะแนนการฟื้นตัวของเข่าตามช่วงเวลา",
   ikdcValidation:"กรุณาตอบทุกข้อก่อนส่งแบบประเมิน",
   ikdcTimepointLabels:{ w2:"2 สัปดาห์", w6:"6 สัปดาห์", w12:"12 สัปดาห์", w25:"25 สัปดาห์", w52:"52 สัปดาห์ (1 ปี)" },
   ikdcSectionSymptoms:"อาการ",
@@ -1367,7 +1369,7 @@ th: {
     ]},
     { icon:"📅", title:"การนัดตรวจติดตาม", items:[
       "โดยทั่วไปนัดตรวจแผลที่ประมาณ 10–14 วัน จากนั้นตามระยะที่แพทย์กำหนด",
-      "นำแอปมาด้วยในวันนัด เพราะแบบประเมิน IKDC และผลการวัดมีประโยชน์ต่อการประเมิน",
+      "นำแอปมาด้วยในวันนัด เพราะแบบสำรวจการฟื้นตัวและผลการวัดมีประโยชน์ต่อการประเมิน",
       "รวบรวมคำถามเรื่องการทำงาน การขับรถ การเดินทาง หรือกีฬา มาถามในวันนัด แทนการคาดเดาเอง"
     ]}
   ],
@@ -1756,14 +1758,14 @@ function ikdcOptionRow(item){
     const rows = options.map(o=>
       `<div class="ikdc-opt ${sel===o.value?'selected':''}" onclick="selectIkdcOption('${item.id}',${o.value})">${o.label}</div>`
     ).join('');
-    return `<div class="ikdc-q"><div class="ikdc-q-label">${c.ikdcLabels[item.id]}</div>${rows}</div>`;
+    return `<div class="ikdc-q" id="ikdc-q-${item.id}"><div class="ikdc-q-label">${c.ikdcLabels[item.id]}</div>${rows}</div>`;
   }
   // vas10 / func10 — 0..10 scale, reuses the pain-dot look
   const endLabels = c.ikdcVasLabels[item.id];
   const dots = Array.from({length:11}, (_,i)=>
     `<div class="pain-dot ${sel===i?'selected':''}" onclick="selectIkdcOption('${item.id}',${i})">${i}</div>`
   ).join('');
-  return `<div class="ikdc-q">
+  return `<div class="ikdc-q" id="ikdc-q-${item.id}">
     <div class="ikdc-q-label">${c.ikdcLabels[item.id]}</div>
     <div class="pain-scale">${dots}</div>
     <div class="pain-scale-labels"><span>${endLabels[0]}</span><span>${endLabels[1]}</span></div>
@@ -1798,9 +1800,14 @@ function closeIkdcForm(){
 }
 async function submitIkdcForm(){
   const c = CONTENT[STATE.lang];
-  const unanswered = IKDC_ITEMS.some(it => typeof ikdcAnswers[it.id] !== 'number');
-  if(unanswered){
+  const missing = IKDC_ITEMS.find(it => typeof ikdcAnswers[it.id] !== 'number');
+  if(missing){
     document.getElementById('ikdc-validation').textContent = c.ikdcValidation;
+    const el = document.getElementById('ikdc-q-'+missing.id);
+    if(el){
+      el.classList.add('missing');
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+    }
     return;
   }
   const score = computeIkdcScore(ikdcAnswers);
