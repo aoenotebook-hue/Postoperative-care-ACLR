@@ -85,9 +85,6 @@
   /* ---------- Restriction banner ---------- */
   .restrict-card{background:#EAF0F6;border:1.5px solid #CBDAE8;border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;}
   .restrict-card.strict{background:var(--warn-bg);border-color:#EBD3A6;}
-  .restrict-head{display:flex;align-items:center;gap:9px;font-weight:800;font-size:13.5px;color:var(--care);margin-bottom:4px;}
-  .restrict-card.strict .restrict-head{color:var(--warn-text);}
-  .restrict-sub{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.45;}
   .restrict-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-top:1px solid rgba(0,0,0,0.06);}
   .restrict-row:first-of-type{border-top:none;}
   .restrict-label{font-size:12.5px;color:var(--muted);flex:1;}
@@ -105,11 +102,7 @@
   .step:last-child::after{display:none;}
   .step.done::after{background:var(--teal);}
 
-  /* ---------- Daily Check-in ---------- */
-  .checkin-status{font-size:12.5px;color:var(--teal);font-weight:700;margin-bottom:14px;}
-  .checkin-status.pending{color:var(--muted);font-weight:600;}
-  .pain-label{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;}
-  .pain-label.second{margin-top:20px;}
+  /* ---------- 0-10 scale (reused by the IKDC form) ---------- */
   .pain-scale{display:flex;gap:5px;justify-content:space-between;}
   .pain-dot{
     flex:1;aspect-ratio:1;max-width:30px;border-radius:50%;border:1.5px solid var(--border);background:#fff;
@@ -117,14 +110,8 @@
     cursor:pointer;transition:.15s;
   }
   .pain-dot.selected{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.12);}
-  .pain-dot.locked{cursor:default;}
   .pain-scale-labels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:6px;}
-  .swell-scale{display:flex;gap:6px;}
-  .swell-opt{flex:1;padding:10px 4px;border-radius:11px;border:1.5px solid var(--border);background:#fff;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;transition:.15s;line-height:1.25;}
-  .swell-opt.selected{background:var(--navy);border-color:var(--navy);color:#fff;}
-  .swell-opt.locked{cursor:default;}
   .checkin-validation{font-size:12px;color:var(--danger);margin-top:10px;min-height:14px;}
-  .checkin-privacy{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;}
   .card .primary-btn{margin-top:14px;}
 
   /* ---------- Home footer ---------- */
@@ -186,6 +173,7 @@
   .ex-phase-def{background:#EAF0F6;color:var(--care);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.5;}
   .ex-phase-def strong{display:block;margin-bottom:3px;font-size:13.5px;}
   .ex-caution{display:flex;gap:8px;background:var(--warn-bg);color:var(--warn-text);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.5;font-weight:600;}
+  .home-disclaimer{display:flex;gap:9px;align-items:flex-start;background:var(--warn-bg);color:var(--warn-text);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;font-size:13px;line-height:1.5;font-weight:600;}
 
   /* ---------- Progress / readiness ---------- */
   .gate-card{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(20,30,50,0.06);border-left:5px solid var(--border);}
@@ -380,6 +368,10 @@
         </div>
       </div>
 
+      <div class="home-disclaimer">⚠️ <span data-t="homeDisclaimer">This app is a general guide only. Please confirm with your physician before starting any activity or exercise.</span></div>
+
+      <div id="ikdc-wrap"></div>
+
       <div id="restrict-wrap"></div>
 
       <div class="card">
@@ -430,25 +422,7 @@
         <p class="muted" data-t="progressIntro">The calendar tells us when to check. Your knee tells us when to progress.</p>
       </div>
 
-      <div class="card" id="checkin-card">
-        <h2 data-t="checkinTitle">Weekly Check-in</h2>
-        <div class="checkin-status" id="checkin-status"></div>
-        <div class="pain-label" data-t="checkinPainLabel">Pain level today</div>
-        <div class="pain-scale" id="pain-scale"></div>
-        <div class="pain-scale-labels">
-          <span data-t="checkinNoPain">No pain</span>
-          <span data-t="checkinWorstPain">Worst pain</span>
-        </div>
-        <div class="pain-label second" data-t="checkinSwellLabel">Knee swelling today</div>
-        <div class="swell-scale" id="swell-scale"></div>
-        <div class="checkin-validation" id="checkin-validation"></div>
-        <button class="primary-btn" id="checkin-submit-btn" onclick="handleSubmitCheckin()" data-t="checkinSubmitBtn">Submit This Week's Check-in</button>
-        <div class="checkin-privacy" data-t="checkinPrivacyNote">Your responses help your care team follow your recovery.</div>
-      </div>
-
-      <div id="ikdc-wrap"></div>
       <div id="gates-wrap"></div>
-      <div id="trend-wrap"></div>
       <div id="metrics-wrap"></div>
       <p class="app-disclaimer" data-t="progressDisclaimer">These checks support the conversation with your surgeon and physiotherapist. They do not replace their assessment, and passing them is not by itself permission to return to sport.</p>
     </section>
@@ -603,6 +577,7 @@ const CONTENT = {
 en: {
   appName:"Post-operative care for ACL reconstruction",
   dayLabel:"days since surgery", untilLabel:"days until surgery", editDate:"Edit your surgery details",
+  homeDisclaimer:"This app is a general guide only. Please confirm with your physician before starting any activity or exercise.",
   roadmapTitle:"Your Recovery Roadmap", todayTitle:"Today's Reminders",
   goalsTitle:"Goals After Surgery",
   goals:[
@@ -614,21 +589,9 @@ en: {
     ["Restore power and speed","Change direction with confidence","Complete your sport programme"],
     ["Keep training twice a week","Protect against re-injury","Stay confident in the knee"]
   ],
-  checkinTitle:"Weekly Check-in",
-  checkinPainLabel:"Pain level today",
-  checkinSwellLabel:"Knee swelling today",
-  checkinNoPain:"No pain",
-  checkinWorstPain:"Worst pain",
-  swellOptions:["None","Mild","Moderate","Severe"],
-  checkinSubmitBtn:"Submit This Week's Check-in",
-  checkinLockedNote:"you can check in again next week",
-  checkinSubmittedPrefix:"Submitted this week at ",
-  checkinNotSubmitted:"Not yet submitted this week",
-  checkinValidation:"Please select a pain level and a swelling level before submitting.",
-  checkinPrivacyNote:"Your responses help your care team follow your recovery.",
   surgeonLabel:"Your surgeon",
   resetBtn:"Reset App Data",
-  resetConfirm:"This will erase your surgery details, exercise progress, measurements, and check-ins on this device. This can't be undone. Continue?",
+  resetConfirm:"This will erase your surgery details, exercise progress, measurements, and IKDC surveys on this device. This can't be undone. Continue?",
   hnPrefix:"HN: ",
   tabHome:"Home", tabCare:"Care", tabExercises:"Exercises", tabProgress:"Progress", tabResources:"Resources", tabSOS:"Alert",
   sosTitle:"When to Get Help", sosSub:"If you notice any of the signs below, contact your care team right away.",
@@ -787,8 +750,6 @@ en: {
   exercisePhaseReadonly:"You're viewing a different phase for reference. Exercises are only tracked in your current phase.",
 
   /* ---- Restrictions ---- */
-  restrictTitle:"Extra protection is active",
-  restrictSub:"These come from your surgery details. Where two instructions disagree, the app shows the more protective one.",
   restrictWB:"Weight on the operated leg",
   restrictFlex:"Bending limit",
   restrictBrace:"Brace",
@@ -820,14 +781,14 @@ en: {
 
   /* ---- IKDC Subjective Knee Evaluation ---- */
   ikdcTitle:"Knee Outcome Survey (IKDC)",
-  ikdcIntro:"A short questionnaire your care team uses to track your knee's recovery. It's asked at 2, 6, 12, 24 and 52 weeks after surgery.",
+  ikdcIntro:"A short questionnaire your care team uses to track your knee's recovery. It's asked at 2, 6, 12, 25 and 52 weeks after surgery.",
   ikdcOverdueNote:"This survey is overdue — please complete it when you can.",
   ikdcOpenBtn:"Start Survey",
   ikdcSubmitBtn:"Submit Survey",
   ikdcCancelBtn:"Cancel",
   ikdcHistoryTitle:"Your IKDC Score Over Time",
   ikdcValidation:"Please answer every question before submitting.",
-  ikdcTimepointLabels:{ w2:"2-week", w6:"6-week", w12:"12-week", w24:"24-week", w52:"52-week (1-year)" },
+  ikdcTimepointLabels:{ w2:"2-week", w6:"6-week", w12:"12-week", w25:"25-week", w52:"52-week (1-year)" },
   ikdcSectionSymptoms:"Symptoms",
   ikdcSectionSports:"Sports Activity",
   ikdcSectionFunction:"Function",
@@ -887,19 +848,14 @@ en: {
   crit:{
     ext:"Knee straightens fully",
     flex:"Bending at least 125°",
-    effusion:"Swelling no worse than mild",
-    effusionNone:"No swelling left in the knee",
     quad80:"Thigh strength at least 80% of the other leg",
     quad90:"Thigh strength at least 90% of the other leg",
     ham80:"Hamstring strength at least 80% of the other leg",
     ham90:"Hamstring strength at least 90% of the other leg",
     hop90:"Hop tests at least 90% of the other leg",
-    pain:"No knee pain with activity",
-    rsi:"Confidence score (ACL-RSI) at least 65",
     noRestrict:"No weight-bearing or bending restrictions left",
     week12:"At least 12 weeks since surgery",
     month9:"At least 9 months since surgery",
-    sportProg:"Sport-specific training programme completed",
     runCleared:"Cleared for running by your care team"
   },
   metrics:{
@@ -908,20 +864,17 @@ en: {
     quadLSI:"Thigh strength vs your other leg",
     hamLSI:"Hamstring strength vs your other leg",
     hopLSI:"Hop distance vs your other leg",
-    rsi:"Confidence in the knee (ACL-RSI)",
     noLimp:"Can you walk without a limp?",
     offCrutches:"Are you off your crutches?",
-    runCleared:"Cleared for running by your care team",
-    sportProg:"Sport-specific programme completed"
+    runCleared:"Cleared for running by your care team"
   },
-  metricUnits:{ extDeficit:"°", flexion:"°", quadLSI:"%", hamLSI:"%", hopLSI:"%", rsi:"" },
+  metricUnits:{ extDeficit:"°", flexion:"°", quadLSI:"%", hamLSI:"%", hopLSI:"%" },
   metricHints:{
     extDeficit:"Lie on your back with the heel propped. 0 means it straightens as far as the other leg.",
     flexion:"Degrees of bend. Your other knee is usually around 135°.",
     quadLSI:"Measured at your clinic. The other leg also gets weaker after surgery, so this can read higher than your true strength.",
     hamLSI:"Measured at your clinic.",
-    hopLSI:"Measured at your clinic.",
-    rsi:"A questionnaire your team will give you. Your surgeon may use a different threshold."
+    hopLSI:"Measured at your clinic."
   },
   yes:"Yes", no:"No", notSet:"—",
   metricsIntro:"Track your own numbers here. Ask your physiotherapist for the strength and hop figures at each visit, then enter them so you can see the trend.",
@@ -933,9 +886,6 @@ en: {
   metricUndo:"Remove last reading",
   metricTarget:(v)=> "target "+v,
   metricToday:"Saved for today",
-  trendPain:"Pain",
-  trendSwelling:"Swelling",
-  trendFromCheckins:"From your daily check-ins",
 
   /* ---- Understanding Your Healing (Home tab) ---- */
   healingTitle:"Understanding Your Healing",
@@ -1009,7 +959,7 @@ en: {
     ]},
     { icon:"📅", title:"Follow-up Visits", items:[
       "Usually around 10–14 days for wound review, then at intervals your surgeon will set.",
-      "Bring the app with you — your check-ins and measurements are useful at each visit.",
+      "Bring the app with you — your IKDC surveys and measurements are useful at each visit.",
       "Bring any questions about work, driving, travel or sport with you rather than guessing between visits."
     ]}
   ],
@@ -1047,6 +997,7 @@ en: {
 th: {
   appName:"การดูแลหลังผ่าตัดสร้างเอ็นไขว้หน้า",
   dayLabel:"วันหลังผ่าตัด", untilLabel:"วันก่อนถึงวันผ่าตัด", editDate:"แก้ไขข้อมูลการผ่าตัดของท่าน",
+  homeDisclaimer:"แอปนี้เป็นเพียงคำแนะนำทั่วไป กรุณาปรึกษาแพทย์ของท่านก่อนเริ่มกิจกรรมหรือการออกกำลังกายใด ๆ",
   roadmapTitle:"เส้นทางการฟื้นตัวของท่าน", todayTitle:"สิ่งที่ควรทำวันนี้",
   goalsTitle:"เป้าหมายหลังผ่าตัด",
   goals:[
@@ -1058,21 +1009,9 @@ th: {
     ["ฟื้นกำลังและความเร็ว","เปลี่ยนทิศทางได้อย่างมั่นใจ","ผ่านโปรแกรมเฉพาะกีฬาครบถ้วน"],
     ["ฝึกต่อเนื่องสัปดาห์ละ 2 ครั้ง","ป้องกันการบาดเจ็บซ้ำ","คงความมั่นใจในเข่า"]
   ],
-  checkinTitle:"บันทึกประจำสัปดาห์",
-  checkinPainLabel:"ระดับความปวดวันนี้",
-  checkinSwellLabel:"อาการบวมของเข่าวันนี้",
-  checkinNoPain:"ไม่ปวด",
-  checkinWorstPain:"ปวดมากที่สุด",
-  swellOptions:["ไม่บวม","บวมเล็กน้อย","บวมปานกลาง","บวมมาก"],
-  checkinSubmitBtn:"ส่งบันทึกประจำสัปดาห์นี้",
-  checkinLockedNote:"สัปดาห์หน้าสามารถบันทึกได้อีกครั้ง",
-  checkinSubmittedPrefix:"ส่งแล้วสัปดาห์นี้เมื่อ ",
-  checkinNotSubmitted:"ยังไม่ได้ส่งบันทึกสัปดาห์นี้",
-  checkinValidation:"กรุณาเลือกระดับความปวดและระดับอาการบวมก่อนส่งบันทึก",
-  checkinPrivacyNote:"คำตอบของท่านช่วยให้ทีมผู้ดูแลติดตามการฟื้นตัวของท่านได้",
   surgeonLabel:"ศัลยแพทย์ของท่าน",
   resetBtn:"รีเซ็ตข้อมูลแอป",
-  resetConfirm:"การดำเนินการนี้จะลบข้อมูลการผ่าตัด ความคืบหน้าท่าบริหาร ผลการวัด และบันทึกประจำวันทั้งหมดบนอุปกรณ์นี้ และไม่สามารถย้อนกลับได้ ต้องการดำเนินการต่อหรือไม่?",
+  resetConfirm:"การดำเนินการนี้จะลบข้อมูลการผ่าตัด ความคืบหน้าท่าบริหาร ผลการวัด และแบบประเมิน IKDC ทั้งหมดบนอุปกรณ์นี้ และไม่สามารถย้อนกลับได้ ต้องการดำเนินการต่อหรือไม่?",
   hnPrefix:"HN: ",
   tabHome:"หน้าแรก", tabCare:"การดูแล", tabExercises:"ท่าบริหาร", tabProgress:"ความก้าวหน้า", tabResources:"แหล่งข้อมูล", tabSOS:"แจ้งเตือน",
   sosTitle:"เมื่อใดควรขอความช่วยเหลือ", sosSub:"หากพบอาการต่อไปนี้ ให้ติดต่อทีมผู้ดูแลทันที",
@@ -1222,8 +1161,6 @@ th: {
   progressLabel:(done,total)=> "ทำแล้ว "+done+" จาก "+total+" ท่าในวันนี้",
   exercisePhaseReadonly:"ท่านกำลังดูระยะอื่นเพื่อเป็นข้อมูลอ้างอิง การติดตามท่าออกกำลังกายทำได้เฉพาะในระยะปัจจุบันของท่านเท่านั้น",
 
-  restrictTitle:"มีข้อจำกัดเพิ่มเติมที่ต้องปฏิบัติ",
-  restrictSub:"ข้อจำกัดเหล่านี้มาจากข้อมูลการผ่าตัดของท่าน หากคำแนะนำสองอย่างขัดกัน แอปจะแสดงข้อที่ระมัดระวังมากกว่า",
   restrictWB:"การลงน้ำหนักขาข้างที่ผ่าตัด",
   restrictFlex:"ขีดจำกัดการงอเข่า",
   restrictBrace:"อุปกรณ์พยุงเข่า",
@@ -1254,14 +1191,14 @@ th: {
 
   /* ---- แบบประเมินเข่า IKDC ---- */
   ikdcTitle:"แบบประเมินผลลัพธ์ของเข่า (IKDC)",
-  ikdcIntro:"แบบสอบถามสั้น ๆ ที่ทีมผู้ดูแลใช้ติดตามการฟื้นตัวของเข่าท่าน โดยจะให้ทำที่ 2, 6, 12, 24 และ 52 สัปดาห์หลังผ่าตัด",
+  ikdcIntro:"แบบสอบถามสั้น ๆ ที่ทีมผู้ดูแลใช้ติดตามการฟื้นตัวของเข่าท่าน โดยจะให้ทำที่ 2, 6, 12, 25 และ 52 สัปดาห์หลังผ่าตัด",
   ikdcOverdueNote:"แบบประเมินนี้เลยกำหนดแล้ว กรุณาทำเมื่อสะดวก",
   ikdcOpenBtn:"เริ่มทำแบบประเมิน",
   ikdcSubmitBtn:"ส่งแบบประเมิน",
   ikdcCancelBtn:"ยกเลิก",
   ikdcHistoryTitle:"คะแนน IKDC ตามช่วงเวลา",
   ikdcValidation:"กรุณาตอบทุกข้อก่อนส่งแบบประเมิน",
-  ikdcTimepointLabels:{ w2:"2 สัปดาห์", w6:"6 สัปดาห์", w12:"12 สัปดาห์", w24:"24 สัปดาห์", w52:"52 สัปดาห์ (1 ปี)" },
+  ikdcTimepointLabels:{ w2:"2 สัปดาห์", w6:"6 สัปดาห์", w12:"12 สัปดาห์", w25:"25 สัปดาห์", w52:"52 สัปดาห์ (1 ปี)" },
   ikdcSectionSymptoms:"อาการ",
   ikdcSectionSports:"กิจกรรมกีฬา",
   ikdcSectionFunction:"การใช้งาน",
@@ -1321,19 +1258,14 @@ th: {
   crit:{
     ext:"เหยียดเข่าได้สุด",
     flex:"งอเข่าได้อย่างน้อย 125 องศา",
-    effusion:"อาการบวมไม่เกินระดับเล็กน้อย",
-    effusionNone:"ไม่มีอาการบวมที่เข่าแล้ว",
     quad80:"กำลังกล้ามเนื้อต้นขาหน้าอย่างน้อย 80% ของขาอีกข้าง",
     quad90:"กำลังกล้ามเนื้อต้นขาหน้าอย่างน้อย 90% ของขาอีกข้าง",
     ham80:"กำลังกล้ามเนื้อต้นขาหลังอย่างน้อย 80% ของขาอีกข้าง",
     ham90:"กำลังกล้ามเนื้อต้นขาหลังอย่างน้อย 90% ของขาอีกข้าง",
     hop90:"ผลทดสอบกระโดดอย่างน้อย 90% ของขาอีกข้าง",
-    pain:"ไม่ปวดเข่าขณะทำกิจกรรม",
-    rsi:"คะแนนความมั่นใจ (ACL-RSI) อย่างน้อย 65",
     noRestrict:"ไม่มีข้อจำกัดการลงน้ำหนักหรือการงอเข่าเหลืออยู่",
     week12:"ผ่านไปอย่างน้อย 12 สัปดาห์หลังผ่าตัด",
     month9:"ผ่านไปอย่างน้อย 9 เดือนหลังผ่าตัด",
-    sportProg:"ผ่านโปรแกรมฝึกเฉพาะกีฬาครบถ้วน",
     runCleared:"ได้รับอนุญาตให้เริ่มวิ่งจากทีมผู้ดูแล"
   },
   metrics:{
@@ -1342,20 +1274,17 @@ th: {
     quadLSI:"กำลังกล้ามเนื้อต้นขาหน้าเทียบกับขาอีกข้าง",
     hamLSI:"กำลังกล้ามเนื้อต้นขาหลังเทียบกับขาอีกข้าง",
     hopLSI:"ระยะกระโดดเทียบกับขาอีกข้าง",
-    rsi:"ความมั่นใจในเข่า (ACL-RSI)",
     noLimp:"ท่าเดินได้โดยไม่กะเผลกหรือไม่?",
     offCrutches:"ท่าเลิกใช้ไม้ค้ำยันแล้วหรือยัง?",
-    runCleared:"ทีมผู้ดูแลอนุญาตให้เริ่มวิ่งแล้ว",
-    sportProg:"ผ่านโปรแกรมเฉพาะกีฬาแล้ว"
+    runCleared:"ทีมผู้ดูแลอนุญาตให้เริ่มวิ่งแล้ว"
   },
-  metricUnits:{ extDeficit:"°", flexion:"°", quadLSI:"%", hamLSI:"%", hopLSI:"%", rsi:"" },
+  metricUnits:{ extDeficit:"°", flexion:"°", quadLSI:"%", hamLSI:"%", hopLSI:"%" },
   metricHints:{
     extDeficit:"นอนหงายและหนุนส้นเท้า ค่า 0 หมายถึงเหยียดได้สุดเท่ากับขาอีกข้าง",
     flexion:"องศาการงอเข่า โดยทั่วไปเข่าข้างปกติจะงอได้ประมาณ 135°",
     quadLSI:"วัดที่คลินิก ขาอีกข้างก็อ่อนแรงลงหลังผ่าตัดเช่นกัน ค่านี้จึงอาจสูงกว่ากำลังจริงของท่าน",
     hamLSI:"วัดที่คลินิก",
-    hopLSI:"วัดที่คลินิก",
-    rsi:"เป็นแบบสอบถามที่ทีมผู้ดูแลจะให้ท่านทำ แพทย์ผู้ผ่าตัดอาจใช้เกณฑ์ที่แตกต่างออกไป"
+    hopLSI:"วัดที่คลินิก"
   },
   yes:"ใช่", no:"ไม่", notSet:"—",
   metricsIntro:"บันทึกค่าต่าง ๆ ของท่านได้ที่นี่ กรุณาสอบถามค่ากำลังกล้ามเนื้อและผลทดสอบกระโดดจากนักกายภาพบำบัดในวันนัด แล้วนำมาบันทึกเพื่อดูแนวโน้ม",
@@ -1367,9 +1296,6 @@ th: {
   metricUndo:"ลบค่าล่าสุด",
   metricTarget:(v)=> "เป้าหมาย "+v,
   metricToday:"บันทึกของวันนี้แล้ว",
-  trendPain:"ความปวด",
-  trendSwelling:"อาการบวม",
-  trendFromCheckins:"จากบันทึกประจำวันของท่าน",
 
   healingTitle:"ทำความเข้าใจการหายของเอ็น",
   healingItems:[
@@ -1441,7 +1367,7 @@ th: {
     ]},
     { icon:"📅", title:"การนัดตรวจติดตาม", items:[
       "โดยทั่วไปนัดตรวจแผลที่ประมาณ 10–14 วัน จากนั้นตามระยะที่แพทย์กำหนด",
-      "นำแอปมาด้วยในวันนัด เพราะบันทึกประจำวันและผลการวัดมีประโยชน์ต่อการประเมิน",
+      "นำแอปมาด้วยในวันนัด เพราะแบบประเมิน IKDC และผลการวัดมีประโยชน์ต่อการประเมิน",
       "รวบรวมคำถามเรื่องการทำงาน การขับรถ การเดินทาง หรือกีฬา มาถามในวันนัด แทนการคาดเดาเอง"
     ]}
   ],
@@ -1479,7 +1405,7 @@ th: {
 /* ============================= CONFIG ============================= */
 const CLINIC_NAME  = { en:"Dr. Sorawut Thamyongkit", th:"นพ.สรวุฒิ ธรรมยงค์กิจ" };
 const CLINIC_PHONE = "02 839 6000";
-// Apps Script Web App URL for the ACL check-in sheet.
+// Apps Script Web App URL for the ACL IKDC-survey sheet.
 // This must point at the ACL sheet, not the shoulder app's — the payload shape is different.
 // After editing the Apps Script, redeploy as a NEW VERSION or this URL keeps serving the old code.
 const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwmRBX8XVfvtF84HqGqvbh0I5wUr9dDrrXGcJZeiCe4G_BHsni355CxLdBSuYSb9PHP/exec";
@@ -1596,15 +1522,13 @@ function runningAllowed(){
 /* ============================= STATE ============================= */
 let STATE = {
   lang:"en", surgeryDate:null, hn:"", graft:"unsure", meniscus:"none", protection:"standard",
-  logDate:null, doneIds:[], checkins:{},
+  logDate:null, doneIds:[],
   metricLog:{},   // { quadLSI:[{d:'2026-08-01', v:85}, ...] } — dated so we can chart it
   flags:{},       // { runCleared:'yes', ... }
-  ikdc:{},        // { w2:{date, answers, score}, w6:{...}, w12:{...}, w24:{...}, w52:{...} }
+  ikdc:{},        // { w2:{date, answers, score, synced}, w6:{...}, w12:{...}, w25:{...}, w52:{...} }
   consentGiven:false, homeScreenPromptShown:false
 };
 let currentExPhase = 0;
-let selectedPain = null;
-let selectedSwell = null;
 
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 
@@ -1637,7 +1561,6 @@ function handleResetApp(){
 }
 document.addEventListener('visibilitychange', () => {
   if(!document.hidden && checkDayRollover()){
-    selectedPain = null; selectedSwell = null;
     saveState(); renderAll();
   }
 });
@@ -1725,7 +1648,7 @@ const IKDC_TIMEPOINTS = [
   { key:'w2',  day:14  },
   { key:'w6',  day:42  },
   { key:'w12', day:84  },
-  { key:'w24', day:168 },
+  { key:'w25', day:175 },
   { key:'w52', day:364 }
 ];
 const IKDC_WINDOW_OPEN_DAYS = 7; // the due card opens this many days before the target day; no hard close
@@ -1873,7 +1796,7 @@ function closeIkdcForm(){
   document.getElementById('ikdc-modal').classList.add('hidden');
   ikdcFormKey = null;
 }
-function submitIkdcForm(){
+async function submitIkdcForm(){
   const c = CONTENT[STATE.lang];
   const unanswered = IKDC_ITEMS.some(it => typeof ikdcAnswers[it.id] !== 'number');
   if(unanswered){
@@ -1881,24 +1804,25 @@ function submitIkdcForm(){
     return;
   }
   const score = computeIkdcScore(ikdcAnswers);
-  STATE.ikdc[ikdcFormKey] = { date: todayISO(), answers: Object.assign({}, ikdcAnswers), score };
+  const key = ikdcFormKey;
+  STATE.ikdc[key] = { date: todayISO(), answers: Object.assign({}, ikdcAnswers), score, synced:false };
   saveState();
   closeIkdcForm();
   renderIkdcCard();
+  await syncOneIkdc(key);
 }
 
 /* ============================= METRICS ============================= */
 // Every numeric measurement is stored as a dated series so the Progress tab can chart it.
-const METRIC_KEYS  = ["extDeficit","flexion","quadLSI","hamLSI","hopLSI","rsi"];
-const FLAG_KEYS    = ["noLimp","offCrutches","runCleared","sportProg"];
+const METRIC_KEYS  = ["extDeficit","flexion","quadLSI","hamLSI","hopLSI"];
+const FLAG_KEYS    = ["noLimp","offCrutches","runCleared"];
 // target line drawn on each chart, and which direction counts as improving
 const METRIC_META = {
   extDeficit:{ target:0,   better:"down", min:0,  max:15  },
   flexion:   { target:125, better:"up",   min:0,  max:140 },
   quadLSI:   { target:90,  better:"up",   min:0,  max:100 },
   hamLSI:    { target:90,  better:"up",   min:0,  max:100 },
-  hopLSI:    { target:90,  better:"up",   min:0,  max:100 },
-  rsi:       { target:65,  better:"up",   min:0,  max:100 }
+  hopLSI:    { target:90,  better:"up",   min:0,  max:100 }
 };
 
 function metricSeries(key){
@@ -1944,22 +1868,10 @@ function flagOk(key){
   const f = STATE.flags && STATE.flags[key];
   return (f === undefined || f === '' || f === null) ? null : f === 'yes';
 }
-// Check-ins are now weekly (any day within the current postop-week bucket), so a
-// check-in only speaks for the knee if it was taken in the current week's bucket.
-function currentWeekCheckin(){
-  const wk = postopWeek();
-  return Object.values(STATE.checkins).find(ci => ci.postopWeekBucket === wk) || null;
-}
-function recentCheckin(){
-  return currentWeekCheckin();
-}
-
 function evalGate(which){
   const R = resolveRestrictions(postopWeek());
   const w = postopWeek();
   const d = postopDay();
-  const ci = recentCheckin();          // swelling now comes from the daily check-in
-  const swell = ci ? ci.swellingScore : null;
   const items = [];
   const push = (key, ok)=> items.push({key, ok});
 
@@ -1967,22 +1879,17 @@ function evalGate(which){
     push("week12", d===null ? null : w >= 12);
     push("ext", lte(latestVal("extDeficit"), 0));
     push("flex", gte(latestVal("flexion"), 125));
-    push("effusion", swell===null ? null : swell <= 1);
     push("quad80", gte(latestVal("quadLSI"), 80));
     push("ham80", gte(latestVal("hamLSI"), 80));
     push("noRestrict", R.wb === "FWB" && R.flexCeiling == null);
   } else {
     push("month9", d===null ? null : d >= 274);
-    push("pain", ci ? ci.painScore <= 1 : null);
-    push("effusionNone", swell===null ? null : swell === 0);
     push("ext", lte(latestVal("extDeficit"), 0));
     push("flex", gte(latestVal("flexion"), 125));
     push("quad90", gte(latestVal("quadLSI"), 90));
     push("ham90", gte(latestVal("hamLSI"), 90));
     push("hop90", gte(latestVal("hopLSI"), 90));
-    push("rsi", gte(latestVal("rsi"), 65));
     push("runCleared", flagOk("runCleared"));
-    push("sportProg", flagOk("sportProg"));
   }
 
   let status = "pass";
@@ -2010,8 +1917,6 @@ function renderRestrictions(){
   if(!rows.length){ wrap.innerHTML=''; return; }
   wrap.innerHTML = `
     <div class="restrict-card ${R.strict?'strict':''}">
-      <div class="restrict-head">${R.strict?'⚠':'ℹ️'} ${c.restrictTitle}</div>
-      <div class="restrict-sub">${c.restrictSub}</div>
       ${rows.map(r=>`<div class="restrict-row"><div class="restrict-label">${r[0]}</div><div class="restrict-value">${r[1]}${until(r[2])}</div></div>`).join('')}
     </div>`;
 }
@@ -2075,99 +1980,39 @@ function renderHome(){
   document.getElementById('surgeon-name').textContent = CLINIC_NAME[STATE.lang] || CLINIC_NAME.en;
 
   renderRestrictions();
+  renderIkdcCard();
 }
 
-/* ============================= WEEKLY CHECK-IN ============================= */
-function renderCheckin(){
-  const c = CONTENT[STATE.lang];
-  const existing = currentWeekCheckin();
-  const locked = !!existing;
-  const offset = daySinceOffset();
-  const card = document.getElementById('checkin-card');
-  card.classList.toggle('hidden', offset !== null && offset < 0);
-
-  const pain = locked ? existing.painScore : selectedPain;
-  const swell = locked ? existing.swellingScore : selectedSwell;
-
-  document.getElementById('pain-scale').innerHTML = Array.from({length:11}, (_,i)=>
-    `<div class="pain-dot ${pain===i?'selected':''} ${locked?'locked':''}" ${locked?'':`onclick="selectPain(${i})"`}>${i}</div>`
-  ).join('');
-
-  document.getElementById('swell-scale').innerHTML = c.swellOptions.map((label,i)=>
-    `<div class="swell-opt ${swell===i?'selected':''} ${locked?'locked':''}" ${locked?'':`onclick="selectSwell(${i})"`}>${label}</div>`
-  ).join('');
-
-  const statusEl = document.getElementById('checkin-status');
-  if(locked){
-    const time = new Date(existing.submittedAt).toLocaleTimeString(STATE.lang==='th'?'th-TH':'en-GB', {hour:'2-digit', minute:'2-digit'});
-    statusEl.textContent = c.checkinSubmittedPrefix + time + " — " + c.checkinLockedNote;
-    statusEl.classList.remove('pending');
-  } else {
-    statusEl.textContent = c.checkinNotSubmitted;
-    statusEl.classList.add('pending');
-  }
-  document.getElementById('checkin-submit-btn').classList.toggle('hidden', locked);
-  if(!locked) document.getElementById('checkin-validation').textContent = '';
-}
-function selectPain(v){ selectedPain = v; document.getElementById('checkin-validation').textContent=''; renderCheckin(); }
-function selectSwell(v){ selectedSwell = v; document.getElementById('checkin-validation').textContent=''; renderCheckin(); }
-
-async function handleSubmitCheckin(){
-  const c = CONTENT[STATE.lang];
-  if(currentWeekCheckin()) return;
-  if(!STATE.consentGiven){ openOnboard(true); return; }
-  if(selectedPain===null || selectedSwell===null){
-    document.getElementById('checkin-validation').textContent = c.checkinValidation;
-    return;
-  }
-  const offset = daySinceOffset();
-  const phaseIdx = currentPhaseIndex(offset);
-  const exList = EXERCISE_SOURCES[phaseIdx].flatMap(src => c.exercises[src]);
-  const doneSet = new Set(STATE.doneIds);
-  const doneToday = exList.filter(e=>doneSet.has(e.id));
-  const R = resolveRestrictions(postopWeek());
-
+/* ============================= IKDC SYNC ============================= */
+async function syncOneIkdc(key){
+  const entry = STATE.ikdc[key];
+  if(!entry || entry.synced) return;
+  if(!SHEET_WEBHOOK_URL) return; // backend not configured yet — entry stays saved locally
   const payload = {
-    date: todayISO(),
-    submittedAt: new Date().toISOString(),
+    type: 'ikdc',
+    timepoint: key,
+    date: entry.date,
     hn: STATE.hn || "",
     surgeryDate: STATE.surgeryDate || "",
     postopDay: postopDay(),
-    postopWeekBucket: postopWeek(),
     graft: STATE.graft,
     meniscusRepair: STATE.meniscus === "yes" ? STATE.protection : "none",
-    phase: c.phaseNames[phaseIdx] + " - " + c.phaseTitles[phaseIdx],
-    painScore: selectedPain,
-    swellingScore: selectedSwell,
-    weightBearing: R.wb,
-    flexionCeiling: R.flexCeiling === null ? "" : R.flexCeiling,
-    exercisesDoneCount: doneToday.length,
-    exercisesTotalCount: exList.length,
-    exercisesDoneNames: doneToday.map(e=>e.name).join("; ")
+    score: entry.score,
+    answers: entry.answers
   };
-  STATE.checkins[payload.date] = Object.assign({}, payload, { synced:false });
-  saveState();
-  renderCheckin();
-  await syncOneCheckin(payload.date);
-}
-
-async function syncOneCheckin(dateKey){
-  const entry = STATE.checkins[dateKey];
-  if(!entry || entry.synced) return;
-  if(!SHEET_WEBHOOK_URL) return; // backend not configured yet — entry stays saved locally
   try{
     await fetch(SHEET_WEBHOOK_URL, {
       method:'POST',
       mode:'no-cors', // Apps Script web apps don't return CORS headers; response is opaque
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify(entry)
+      body: JSON.stringify(payload)
     });
     entry.synced = true; // optimistic — no-cors means we can't read a real success response
     saveState();
-  }catch(err){ console.warn('Check-in sync failed, will retry next app load:', err); }
+  }catch(err){ console.warn('IKDC sync failed, will retry next app load:', err); }
 }
-async function trySyncPendingCheckins(){
-  for(const k in STATE.checkins){ if(!STATE.checkins[k].synced) await syncOneCheckin(k); }
+async function trySyncPendingIkdc(){
+  for(const k in STATE.ikdc){ if(!STATE.ikdc[k].synced) await syncOneIkdc(k); }
 }
 
 /* ============================= RENDER: CARE ============================= */
@@ -2385,32 +2230,11 @@ function flagCardHtml(){
   return `<div class="card">${rows}</div>`;
 }
 
-/* Pain and swelling are already collected daily, so they chart themselves. */
-function checkinTrendHtml(field, title, meta){
-  const c = CONTENT[STATE.lang];
-  const series = Object.keys(STATE.checkins).sort()
-    .map(k=>({ d:k, v:STATE.checkins[k][field] }))
-    .filter(p=> typeof p.v === 'number');
-  if(series.length < 2) return '';
-  const v = series[series.length-1].v;
-  return `<div class="metric-card">
-    <div class="metric-top"><div class="metric-name">${title}</div><div class="metric-latest">${v}</div></div>
-    <div class="metric-sub">${c.trendFromCheckins}</div>
-    ${sparkSvg(series, meta)}
-  </div>`;
-}
-
 function renderProgress(){
   const c = CONTENT[STATE.lang];
-  renderCheckin();
-  renderIkdcCard();
   document.getElementById('gates-wrap').innerHTML =
       gateCardHtml("run", c.runGateTitle, c.runGateSub, 3)
     + gateCardHtml("rts", c.rtsGateTitle, c.rtsGateSub, 4);
-
-  document.getElementById('trend-wrap').innerHTML =
-      checkinTrendHtml('painScore',     c.trendPain,     {target:0, better:'down', min:0, max:10})
-    + checkinTrendHtml('swellingScore', c.trendSwelling, {target:0, better:'down', min:0, max:3});
 
   document.getElementById('metrics-wrap').innerHTML =
       `<p class="progress-label" style="margin-bottom:14px;">${c.metricsIntro}</p>`
@@ -2492,6 +2316,14 @@ function switchTab(tab){
     renderExercisePhaseTabs(); renderExerciseList();
   }
   if(tab==='progress') renderProgress();
+  if(tab==='home') maybeAutoOpenIkdc();
+}
+function maybeAutoOpenIkdc(){
+  if(ikdcFormKey) return; // already open
+  if(!document.getElementById('onboard').classList.contains('hidden')) return; // onboarding takes priority
+  if(!document.getElementById('addhome-modal').classList.contains('hidden')) return;
+  const due = ikdcDueTimepoint();
+  if(due) openIkdcForm(due.key);
 }
 
 /* ============================= ONBOARD ============================= */
@@ -2574,7 +2406,8 @@ function renderAll(){
   await loadState();
   renderAll();
   if(!STATE.surgeryDate){ openOnboard(false); }
-  trySyncPendingCheckins();
+  maybeAutoOpenIkdc();
+  trySyncPendingIkdc();
 })();
 </script>
 
