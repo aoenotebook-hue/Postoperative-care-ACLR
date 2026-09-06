@@ -37,6 +37,14 @@
     display:flex;flex-direction:column;position:relative;overflow-x:hidden;
     box-shadow:0 0 40px rgba(0,0,0,0.15);
   }
+  /* Faint tiled HN watermark so a leaked screenshot can be traced back to the
+     patient it came from. Not a security control — see COPY DETERRENTS in the
+     script for why screen capture itself can't be blocked from a web page. */
+  #watermark-overlay{
+    position:absolute;inset:0;z-index:999;pointer-events:none;
+    opacity:.08;background-repeat:repeat;display:none;
+  }
+  #watermark-overlay.active{display:block;}
   /* ---------- Header ---------- */
   header{
     position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--navy),var(--navy-2));
@@ -493,6 +501,8 @@
       <span data-t="tabSOS">Alert</span>
     </button>
   </nav>
+
+  <div id="watermark-overlay"></div>
 
 </div>
 
@@ -2004,6 +2014,7 @@ function renderHome(){
   document.getElementById('healing-list').innerHTML = c.healingItems.map(g=>'• '+g).join('<br><br>');
   document.getElementById('header-hn').textContent = STATE.hn ? (c.hnPrefix + STATE.hn) : '';
   document.getElementById('surgeon-name').textContent = CLINIC_NAME[STATE.lang] || CLINIC_NAME.en;
+  renderWatermark();
 
   renderRestrictions();
   renderIkdcCard();
@@ -2491,6 +2502,32 @@ document.addEventListener('cut', e => { if(!isFormField(e.target)) e.preventDefa
 document.addEventListener('dragstart', e => {
   if(e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO')) e.preventDefault();
 });
+
+/* ============================= WATERMARK =============================
+ * Tiles the patient's HN faintly across the app so a leaked screenshot can be
+ * traced back to them. Does not and cannot stop the screenshot itself. */
+function escapeXml(s){
+  return String(s).replace(/[<>&'"]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[ch]));
+}
+function buildWatermarkSvg(label){
+  const w = 220, h = 140;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">`
+    + `<text x="10" y="${h/2}" transform="rotate(-30 ${w/2} ${h/2})" `
+    + `font-family="sans-serif" font-size="14" fill="#000">${escapeXml(label)}</text></svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+}
+function renderWatermark(){
+  const el = document.getElementById('watermark-overlay');
+  if(!el) return;
+  if(STATE.hn){
+    const c = CONTENT[STATE.lang];
+    el.style.backgroundImage = `url("${buildWatermarkSvg((c.hnPrefix||'HN: ') + STATE.hn)}")`;
+    el.classList.add('active');
+  } else {
+    el.classList.remove('active');
+    el.style.backgroundImage = '';
+  }
+}
 
 /* ============================= INIT ============================= */
 (async function init(){
