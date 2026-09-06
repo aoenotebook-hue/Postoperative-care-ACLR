@@ -24,6 +24,12 @@
     --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  /* Deter casual copying of text/media. This is not real protection — a determined
+     user can still view-source, use dev tools, or disable JS — but it stops
+     accidental long-press selection, right-click save, and image/video dragging. */
+  *{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;-webkit-touch-callout:default;}
+  img,video{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
   html,body{margin:0;padding:0;background:#DCE1E8;font-family:var(--font);color:var(--text);}
   body{display:flex;justify-content:center;min-height:100vh;}
   #app-shell{
@@ -2470,6 +2476,21 @@ function renderAll(){
   renderResources();
   renderSOS();
 }
+
+/* ============================= COPY DETERRENTS =============================
+ * Best-effort only — blocks the casual paths (right-click/long-press menu, Ctrl/Cmd+C,
+ * image drag). None of this stops view-source, browser dev tools, disabling JS, or a
+ * screenshot/photo of the screen — there is no web API that can prevent those, on any
+ * platform. Form fields are exempted so patients can still copy/paste their HN etc. */
+function isFormField(el){
+  return !!(el && el.closest && el.closest('input, textarea, select'));
+}
+document.addEventListener('contextmenu', e => { if(!isFormField(e.target)) e.preventDefault(); });
+document.addEventListener('copy', e => { if(!isFormField(e.target)) e.preventDefault(); });
+document.addEventListener('cut', e => { if(!isFormField(e.target)) e.preventDefault(); });
+document.addEventListener('dragstart', e => {
+  if(e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO')) e.preventDefault();
+});
 
 /* ============================= INIT ============================= */
 (async function init(){
