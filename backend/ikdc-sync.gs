@@ -131,7 +131,9 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Must start with a letter/digit: a leading "-" would let Sheets read the
 // cell as a number or formula. Mirrors HN_PATTERN in app.js — keep in sync.
-const HN_RE = /^[A-Za-z0-9][A-Za-z0-9/-]{0,19}$/;
+// Case-insensitive here (stored uppercase) so older app builds that didn't
+// uppercase the HN aren't rejected.
+const HN_RE = /^[A-Za-z0-9][A-Za-z0-9./-]{0,19}$/;
 
 /* ============================= VALIDATION ============================= */
 
@@ -226,6 +228,7 @@ function doPost(e) {
       return jsonOut_({ ok: false, error: 'unsupported_type' });
     }
 
+    if (typeof body.hn === 'string') body.hn = body.hn.toUpperCase();
     const errors = validatePayload(body);
     if (errors.length) {
       return jsonOut_({ ok: false, error: 'invalid_payload', detail: errors });

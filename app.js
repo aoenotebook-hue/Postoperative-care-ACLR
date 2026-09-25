@@ -34,7 +34,7 @@ en: {
   onboardLead:"This helps the app show you the right recovery phase, the right exercises, and any extra protection your surgery needs.",
   onboardDateLabel:"Date of your knee surgery",
   onboardHNLabel:"Hospital Number (HN)",
-  onboardHNHint:"Helps hospital staff find your records quickly.",
+  onboardHNHint:"Needed to send your results to your care team. You'll find it on your hospital card or appointment slip.",
   onboardGraftLabel:"Which graft was used?",
   onboardGraftHint:"If you are not sure, choose \"Not sure\" and ask at your next visit.",
   graftOptions:{ unsure:"Not sure / as advised", hamstring:"Hamstring tendon", bpb:"Patellar tendon (BTB)", quad:"Quadriceps tendon", allograft:"Donor graft (allograft)" },
@@ -46,7 +46,9 @@ en: {
   consentCheckboxLabel:"I have read and agree to the above.",
   consentValidation:"Please confirm to continue.",
   dateRequiredValidation:"Please enter your surgery date to continue.",
-  hnFormatValidation:"Please check your HN — use only letters, numbers, - or /, up to 20 characters.",
+  hnFormatValidation:"Please check your HN — use only letters, numbers, and - . or /, up to 20 characters.",
+  hnRequiredValidation:"Please enter your HN — you'll find it on your hospital card or appointment slip.",
+  hnMissingPrompt:"Please add your HN so your results can reach your care team.",
   dateRangeValidation:"Please check that date — it should be within the last 5 years and no more than a year from now.",
   addHomeTitle:"Add to Home Screen?",
   addHomeBody:"Add this app to your home screen for one-tap access anytime, just like a regular app.",
@@ -469,7 +471,7 @@ th: {
   onboardLead:"ข้อมูลนี้จะช่วยให้แอปแสดงระยะการฟื้นตัว ท่าบริหาร และข้อควรระวังเพิ่มเติมที่เหมาะกับการผ่าตัดของท่าน",
   onboardDateLabel:"วันที่ท่านผ่าตัดเข่า",
   onboardHNLabel:"หมายเลขประจำตัวผู้ป่วย (HN)",
-  onboardHNHint:"ช่วยให้เจ้าหน้าที่โรงพยาบาลค้นหาประวัติของท่านได้รวดเร็วขึ้น",
+  onboardHNHint:"ใช้สำหรับส่งผลการประเมินให้ทีมผู้ดูแล ดูได้จากบัตรโรงพยาบาลหรือใบนัดของท่าน",
   onboardGraftLabel:"ใช้เอ็นชนิดใดในการสร้างเอ็นไขว้หน้า?",
   onboardGraftHint:"หากไม่แน่ใจ ให้เลือก \"ไม่แน่ใจ\" แล้วสอบถามในวันนัดครั้งถัดไป",
   graftOptions:{ unsure:"ไม่แน่ใจ / ตามที่แพทย์แจ้ง", hamstring:"เอ็นกล้ามเนื้อต้นขาด้านหลัง (Hamstring)", bpb:"เอ็นสะบ้า (Patellar tendon / BTB)", quad:"เอ็นกล้ามเนื้อต้นขาด้านหน้า (Quadriceps tendon)", allograft:"เอ็นจากผู้บริจาค (Allograft)" },
@@ -481,7 +483,9 @@ th: {
   consentCheckboxLabel:"ข้าพเจ้าได้อ่านและยินยอมตามข้อความข้างต้น",
   consentValidation:"กรุณายืนยันเพื่อดำเนินการต่อ",
   dateRequiredValidation:"กรุณาระบุวันที่ผ่าตัดเพื่อดำเนินการต่อ",
-  hnFormatValidation:"กรุณาตรวจสอบหมายเลข HN — ใช้ได้เฉพาะตัวอักษร ตัวเลข เครื่องหมาย - หรือ / ไม่เกิน 20 ตัว",
+  hnFormatValidation:"กรุณาตรวจสอบหมายเลข HN — ใช้ได้เฉพาะตัวอักษร ตัวเลข และเครื่องหมาย - . หรือ / ไม่เกิน 20 ตัว",
+  hnRequiredValidation:"กรุณากรอกหมายเลข HN ดูได้จากบัตรโรงพยาบาลหรือใบนัดของท่าน",
+  hnMissingPrompt:"กรุณาเพิ่มหมายเลข HN เพื่อให้ผลการประเมินของท่านส่งถึงทีมผู้ดูแลได้",
   dateRangeValidation:"กรุณาตรวจสอบวันที่อีกครั้ง ควรอยู่ภายใน 5 ปีที่ผ่านมา และไม่เกิน 1 ปีข้างหน้า",
   addHomeTitle:"เพิ่มลงหน้าจอหลักหรือไม่?",
   addHomeBody:"เพิ่มแอปนี้ลงหน้าจอหลักของท่าน เพื่อเปิดใช้งานได้ทันทีเหมือนแอปทั่วไป",
@@ -1100,6 +1104,13 @@ let deferredInstallPrompt = null;
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredInstallPrompt = e; });
+// Offline support + reliable Android install. Service workers need a secure
+// origin, so this is skipped when the app is opened as a local file.
+if('serviceWorker' in navigator && window.isSecureContext && location.protocol !== 'file:'){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.warn('Service worker registration failed:', err));
+  });
+}
 function maybeShowAddHomePrompt(){
   if(IS_STANDALONE || STATE.homeScreenPromptShown) return;
   document.getElementById('addhome-steps').classList.add('hidden');
@@ -2020,11 +2031,16 @@ function openOnboard(prefill){
 function closeOnboard(){ document.getElementById('onboard').classList.add('hidden'); renderAll(); }
 // Must accept exactly what backend/ikdc-sync.gs's HN_RE accepts, or uploads
 // with this HN get rejected server-side forever.
-const HN_PATTERN = /^[A-Za-z0-9][A-Za-z0-9/-]{0,19}$/;
+const HN_PATTERN = /^[A-Z0-9][A-Z0-9./-]{0,19}$/;
+// Forgiving on purpose: patients copy their HN from a card or slip in all
+// sorts of ways ("HN 65-12345", "๖๕๑๒๓๔๕", "65 12345"). Whatever they type
+// should land on the same canonical value.
 function normalizeHn(raw){
   return String(raw || '')
-    .trim()
-    .replace(/[๐-๙]/g, ch => String(ch.charCodeAt(0) - 0x0E50)); // Thai digits -> ASCII
+    .replace(/[๐-๙]/g, ch => String(ch.charCodeAt(0) - 0x0E50)) // Thai digits -> ASCII
+    .replace(/\s+/g, '')                                         // spaces anywhere
+    .replace(/^HN[:.#-]*(?=\d)/i, '')                            // a typed "HN" label
+    .toUpperCase();
 }
 function isValidHn(hn){ return HN_PATTERN.test(hn); }
 
@@ -2034,9 +2050,11 @@ function saveOnboard(){
   document.getElementById('date-validation').textContent = '';
   document.getElementById('consent-validation').textContent = '';
   document.getElementById('hn-validation').textContent = '';
+  // HN is the only thing that ties results to the patient — no codes or
+  // PINs — so it's required.
   const hn = normalizeHn(document.getElementById('input-hn').value);
-  if(hn && !isValidHn(hn)){
-    document.getElementById('hn-validation').textContent = c.hnFormatValidation; return;
+  if(!isValidHn(hn)){
+    document.getElementById('hn-validation').textContent = hn ? c.hnFormatValidation : c.hnRequiredValidation; return;
   }
   if(!d && !STATE.surgeryDate){
     document.getElementById('date-validation').textContent = c.dateRequiredValidation; return;
@@ -2175,6 +2193,11 @@ document.addEventListener('error', e => {
   await loadState();
   renderAll();
   if(!STATE.surgeryDate){ openOnboard(false); }
+  else if(!isValidHn(STATE.hn)){
+    // Set up before HN was required: ask once, with everything else prefilled.
+    openOnboard(true);
+    document.getElementById('hn-validation').textContent = CONTENT[STATE.lang].hnMissingPrompt;
+  }
   maybeAutoOpenIkdc();
   trySyncPendingIkdc();
 })();
