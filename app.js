@@ -1031,6 +1031,10 @@ function migrateIkdcSyncFields(){
     if(!entry.idempotencyKey) entry.idempotencyKey = genUuidV4();
     if(!entry.syncStatus) entry.syncStatus = entry.synced ? 'confirmed' : 'pending';
     delete entry.synced;
+    // An entry already in 'retrying' was sent at least once by an earlier
+    // build that didn't track this — assume it reached the server so it
+    // isn't blindly re-sent to a backend that can't dedupe.
+    if(entry.posted === undefined) entry.posted = entry.syncStatus === 'retrying';
   }
 }
 async function saveState(){
@@ -1318,7 +1322,8 @@ async function submitIkdcForm(){
     answers: Object.assign({}, ikdcAnswers),
     score,
     idempotencyKey: genUuidV4(),
-    syncStatus: 'pending' // 'pending' | 'confirmed' — see syncOneIkdc()
+    syncStatus: 'pending', // 'pending' | 'retrying' | 'confirmed' — see syncOneIkdc()
+    posted: false          // true once a POST has reached the server
   };
   saveState();
   closeIkdcForm();
@@ -1556,19 +1561,25 @@ async function postIkdcSubmission(key, entry){
 // Reads a real, readable ack. GET requests to an Apps Script /exec URL are,
 // in practice, more reliably readable cross-origin than POST responses —
 // see backend/ikdc-sync.gs for the server side and how to verify this
-// against your actual deployment. Returns true only on an explicit,
-// readable {found:true} — anything else (including a network/CORS error)
-// returns false and the caller keeps the entry pending for the next retry.
+// against your actual deployment. Returns:
+//   'found'     — the backend has this submission; safe to mark confirmed.
+//   'not_found' — the backend answered in the new contract's format and does
+//                 NOT have it. This also proves the deduplicating backend is
+//                 live, so re-sending is safe.
+//   'unknown'   — offline, blocked, rate-limited, or a backend that doesn't
+//                 speak this contract (e.g. the pre-hardening Apps Script).
 async function confirmSyncStatus(idempotencyKey){
   try{
     const url = SHEET_WEBHOOK_URL + '?action=status&key=' + encodeURIComponent(idempotencyKey);
     const res = await fetchWithTimeout(url, { method:'GET' }); // defaults to mode:'cors'
-    if(!res.ok) return false;
+    if(!res.ok) return 'unknown';
     const data = await res.json();
-    return data && data.ok === true && data.found === true;
+    if(data && data.ok === true && data.found === true) return 'found';
+    if(data && data.ok === true && data.found === false) return 'not_found';
+    return 'unknown';
   }catch(err){
     console.warn('IKDC status check failed, will retry later:', err);
-    return false;
+    return 'unknown';
   }
 }
 
@@ -1589,18 +1600,22 @@ async function syncOneIkdc(key){
   try{
     if(!entry.idempotencyKey) entry.idempotencyKey = genUuidV4(); // migrated pre-idempotency entry
 
-    // On a retry, the earlier POST may well have landed and only the
-    // confirmation failed — check before re-sending.
-    let confirmed = entry.syncStatus === 'retrying' && await confirmSyncStatus(entry.idempotencyKey);
-    if(!confirmed){
-      try{ await postIkdcSubmission(key, entry); }
-      catch(err){ console.warn('IKDC submit failed, will retry later:', err); }
-      confirmed = await confirmSyncStatus(entry.idempotencyKey);
+    // Once a POST has reached the server, sending it again is only safe if
+    // the backend is known to dedupe on idempotencyKey. The pre-hardening
+    // Apps Script appends a row for every POST and can't answer status
+    // checks, so against it a blind re-send on every app open would pile up
+    // duplicate rows. Re-send only after the backend has explicitly said
+    // "not found" (which only the deduplicating backend can say).
+    let status = entry.posted ? await confirmSyncStatus(entry.idempotencyKey) : 'unknown';
+    if(status !== 'found' && (!entry.posted || status === 'not_found')){
+      try{
+        await postIkdcSubmission(key, entry); // resolves only if the request reached the server
+        entry.posted = true;
+      }catch(err){ console.warn('IKDC submit failed, will retry later:', err); }
+      status = await confirmSyncStatus(entry.idempotencyKey);
     }
-    if(confirmed) entry.syncStatus = 'confirmed';
+    if(status === 'found') entry.syncStatus = 'confirmed';
     else if(entry.syncStatus === 'pending') entry.syncStatus = 'retrying';
-    // Re-sending is safe: the backend dedupes on idempotencyKey, so a retry
-    // never creates a second row once the first one actually landed.
     saveState();
     renderIkdcCard();
   } finally {
