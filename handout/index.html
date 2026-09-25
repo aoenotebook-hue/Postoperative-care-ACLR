@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คู่มือเริ่มใช้แอป — ACL Recovery App</title>
+<style>
+  @page { size: A4; margin: 14mm; }
+  :root { --navy:#1F3864; --muted:#5B6474; --line:#D9DEE7; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#F3F5F8; font-family: "Sarabun","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif; color:#1C2330; }
+  .sheet { max-width: 182mm; margin: 12px auto; background:#fff; padding: 12mm 12mm 10mm; border-radius: 10px; }
+  @media print { body { background:#fff; } .sheet { margin:0; padding:0; border-radius:0; max-width:none; } }
+
+  header { display:flex; align-items:center; gap:14px; padding-bottom:12px; border-bottom:3px solid var(--navy); }
+  header img { width:64px; height:64px; }
+  h1 { margin:0; font-size:24px; color:var(--navy); line-height:1.25; }
+  .en { color:var(--muted); font-size:0.82em; font-weight:400; }
+  h1 .en { display:block; font-size:15px; margin-top:2px; }
+
+  .lead { margin:14px 0 4px; font-size:17px; line-height:1.5; }
+  .badges { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 16px; }
+  .badge { border:1.5px solid var(--navy); color:var(--navy); border-radius:999px; padding:3px 12px; font-size:14px; font-weight:600; }
+
+  .main { display:flex; gap:22px; align-items:flex-start; }
+  .qr { flex:0 0 72mm; text-align:center; }
+  .qr img { width:72mm; height:72mm; display:block; image-rendering:pixelated; }
+  .qr .url { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:13px; margin-top:4px; word-break:break-all; }
+  .qr .scan { font-size:15px; font-weight:700; color:var(--navy); margin-top:6px; }
+
+  ol.steps { list-style:none; margin:0; padding:0; flex:1; counter-reset:step; }
+  ol.steps li { counter-increment:step; position:relative; padding:0 0 14px 46px; font-size:17px; line-height:1.45; }
+  ol.steps li::before { content:counter(step); position:absolute; left:0; top:0; width:34px; height:34px; border-radius:50%; background:var(--navy); color:#fff; font-weight:700; font-size:18px; display:flex; align-items:center; justify-content:center; }
+  ol.steps .en { display:block; font-size:14px; margin-top:2px; }
+
+  .fill { margin-top:10px; border:1.5px dashed var(--line); border-radius:10px; padding:12px 14px; display:grid; grid-template-columns:1fr 1fr; gap:18px; font-size:16px; }
+  .fill div { border-bottom:1.5px solid #9AA3B2; padding-bottom:22px; }
+  .fill-note { font-size:13px; color:var(--muted); margin-top:6px; }
+
+  .get { margin-top:16px; background:#EEF2F8; border-radius:10px; padding:12px 16px; }
+  .get h2 { margin:0 0 6px; font-size:17px; color:var(--navy); }
+  .get ul { margin:0; padding-left:20px; font-size:15px; line-height:1.6; }
+
+  footer { margin-top:14px; font-size:12.5px; color:var(--muted); line-height:1.5; border-top:1px solid var(--line); padding-top:8px; }
+</style>
+</head>
+<body>
+<main class="sheet">
+  <header>
+    <img src="../images/logo.png" alt="">
+    <h1>การดูแลหลังผ่าตัดสร้างเอ็นไขว้หน้าเข่า
+      <span class="en">Post-operative care for ACL reconstruction</span>
+    </h1>
+  </header>
+
+  <p class="lead">แอปคู่มือฟื้นฟูหลังผ่าตัดบนมือถือของท่าน ใช้ได้ทันที
+    <span class="en">— your recovery guide, on your phone</span></p>
+  <div class="badges">
+    <span class="badge">ใช้ฟรี · Free</span>
+    <span class="badge">ไม่ต้องสมัครสมาชิก · No sign-up</span>
+    <span class="badge">ไม่ต้องใช้รหัส · No code needed</span>
+  </div>
+
+  <section class="main">
+    <div class="qr">
+      <img src="qr.png" alt="QR code: postoperative-care-aclr.vercel.app">
+      <div class="scan">สแกนเพื่อเปิดแอป · Scan to open</div>
+      <div class="url">postoperative-care-aclr.vercel.app</div>
+    </div>
+
+    <ol class="steps">
+      <li>สแกน QR Code ด้วยกล้องมือถือ
+        <span class="en">Scan the QR code with your phone camera.</span></li>
+      <li>กรอก<strong>วันที่ผ่าตัด</strong>และ<strong>หมายเลข HN</strong> ของท่าน (ดูได้จากบัตรโรงพยาบาลหรือใบนัด)
+        <span class="en">Enter your surgery date and your HN (on your hospital card or appointment slip).</span></li>
+      <li>กด “เพิ่มลงหน้าจอหลัก” เพื่อเปิดแอปได้ในแตะเดียว
+        <span class="en">Tap “Add to Home Screen” for one-tap access.</span></li>
+    </ol>
+  </section>
+
+  <div class="fill">
+    <div>HN:</div>
+    <div>วันที่ผ่าตัด · Surgery date:</div>
+  </div>
+  <div class="fill-note">เจ้าหน้าที่อาจเขียนให้ท่าน เพื่อกรอกในแอปได้สะดวก · Staff may fill these in for you.</div>
+
+  <section class="get">
+    <h2>ในแอปมีอะไรบ้าง · What's inside</h2>
+    <ul>
+      <li>ท่าบริหารตามระยะการฟื้นตัว พร้อมภาพและวิดีโอ <span class="en">· Exercises for each recovery stage, with pictures and videos</span></li>
+      <li>คำแนะนำการดูแลตนเองหลังผ่าตัด <span class="en">· Self-care advice after surgery</span></li>
+      <li>แบบประเมินการฟื้นตัวของเข่า ส่งถึงทีมผู้ดูแลโดยอัตโนมัติ <span class="en">· Knee recovery surveys, sent to your care team automatically</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    แอปนี้เป็นคำแนะนำทั่วไป ไม่ใช้แทนคำแนะนำของแพทย์ หากปวดน่องหรือน่องบวมมากขึ้น ไข้สูงกว่า 38.3°C แผลแดงร้อนลามหรือมีหนอง หรือปวดรุนแรงที่ไม่ทุเลาด้วยยาแก้ปวด ให้ติดต่อทีมผู้ดูแลทันที (ดูเพิ่มเติมที่แท็บ “แจ้งเตือน” ในแอป) หากเจ็บหน้าอก หายใจลำบากเฉียบพลัน หรือไอเป็นเลือด ให้ไปห้องฉุกเฉินทันที<br>
+    <span class="en">This app is a general guide and does not replace your doctor's advice. Contact your care team right away for worsening calf pain or swelling, fever above 38.3°C, spreading redness or pus from a wound, or severe pain not helped by your pain medication (see the app's Alert tab). For chest pain, sudden breathlessness or coughing up blood, go to the emergency room immediately.</span>
+  </footer>
+</main>
+</body>
+</html>
