@@ -14,10 +14,12 @@
  *     project must use the V8 runtime (Project Settings > "Enable Chrome V8
  *     runtime") — otherwise saving fails with a syntax error.
  *  3. Optional: run setupSheetHeaders() once (function dropdown > Run) to
- *     create the SHEET_NAME tab and grant permissions. If a tab with that
- *     name already holds other data (e.g. results from the old script), it
- *     stops with an error instead of touching it — set SHEET_NAME to a new
- *     name such as "IKDC_v2" and run it again. Don't edit COLUMNS.
+ *     create or tidy the SHEET_NAME tab and grant permissions. A tab written
+ *     by the previous version of this script (one "AnswersJson" column) is
+ *     converted to the readable layout — one column per IKDC question —
+ *     keeping every row. A tab holding anything else is never touched: it
+ *     stops with an error instead — set SHEET_NAME to a new name such as
+ *     "IKDC_v2" and run it again. Don't edit COLUMNS or QUESTIONS.
  *  4. Deploy > Manage deployments > pencil on the EXISTING deployment >
  *     Version: New version > Deploy (Execute as: Me, Who has access:
  *     Anyone). Never "New deployment": that creates a different /exec URL
@@ -89,24 +91,72 @@
 // Name of the sheet/tab this script writes IKDC submissions to.
 const SHEET_NAME = 'IKDC';
 
-// Fixed column order this script writes to, left to right starting at column A.
-// If you add your own formula/computed columns, put them AFTER this list
-// (i.e. starting at column COLUMNS.length + 1) — this script never writes there.
-const COLUMNS = [
-  'ReceivedAt',       // server timestamp, ISO string — set by this script, not the client
-  'IdempotencyKey',   // client-generated UUID — used for dedup, see findExistingRow()
-  'HN',
-  'Timepoint',        // w2 | w6 | w12 | w25 | w52
-  'AssessmentDate',   // date the patient filled out the form (client-supplied, validated)
-  'SurgeryDate',
-  'PostopDay',
-  'Graft',
-  'MeniscusRepair',   // protected | none
-  'Score',            // SERVER-COMPUTED, never trusts the client-sent score
-  'AnswersJson'       // raw answers object, JSON-stringified, for audit/re-scoring later
+// Time zone for the "Received" column.
+const TIME_ZONE = 'Asia/Bangkok';
+
+// One readable row per survey, one column per IKDC question. Column headings
+// double as the lookup keys, so don't rename them. If you add your own
+// formula/computed columns, put them AFTER the last one — this script never
+// writes there.
+//
+// 0-10 questions are stored the way the app scores them: 10 is always the
+// BEST end (e.g. pain frequency 10 = never). That is the reverse of the paper
+// IKDC form's pain scales, so each heading spells out the direction.
+const QUESTIONS = [
+  { id: 'q1',   header: 'Q1 Highest activity without significant pain', kind: 'activity' },
+  { id: 'q2',   header: 'Q2 Pain frequency (0 = constant, 10 = never)', kind: 'scale' },
+  { id: 'q3',   header: 'Q3 Pain severity (0 = worst imaginable, 10 = no pain)', kind: 'scale' },
+  { id: 'q4',   header: 'Q4 Stiffness / swelling', kind: 'stiff' },
+  { id: 'q5',   header: 'Q5 Highest activity without significant swelling', kind: 'activity' },
+  { id: 'q6',   header: 'Q6 Locking or catching', kind: 'lock' },
+  { id: 'q7',   header: 'Q7 Highest activity without giving way', kind: 'activity' },
+  { id: 'q8',   header: 'Q8 Highest regular activity level', kind: 'activity' },
+  { id: 'q9a',  header: 'Q9a Going up stairs', kind: 'diff' },
+  { id: 'q9b',  header: 'Q9b Going down stairs', kind: 'diff' },
+  { id: 'q9c',  header: 'Q9c Kneeling on front of knee', kind: 'diff' },
+  { id: 'q9d',  header: 'Q9d Squatting', kind: 'diff' },
+  { id: 'q9e',  header: 'Q9e Sitting with knee bent', kind: 'diff' },
+  { id: 'q9f',  header: 'Q9f Rising from a chair', kind: 'diff' },
+  { id: 'q9g',  header: 'Q9g Running straight ahead', kind: 'diff' },
+  { id: 'q9h',  header: 'Q9h Jumping and landing on injured leg', kind: 'diff' },
+  { id: 'q9i',  header: 'Q9i Stopping and starting quickly', kind: 'diff' },
+  { id: 'q10a', header: 'Q10a Current knee function (0 = unable to do daily activities, 10 = normal)', kind: 'scale' },
+  { id: 'q10b', header: 'Q10b Knee function before injury (0-10, not scored)', kind: 'scale' }
 ];
-// Every column except the two numeric ones is stored as plain text — see doPost().
-const TEXT_COLUMNS = COLUMNS.filter(name => name !== 'PostopDay' && name !== 'Score');
+// Answer wording for each points value. Mirrors the app's IKDC options.
+const ANSWER_TEXT = {
+  activity: { 4: 'Very strenuous (jumping, pivoting)', 3: 'Strenuous (heavy work, skiing, tennis)', 2: 'Moderate (running, jogging)', 1: 'Light (walking, housework)', 0: 'Unable to do any of these' },
+  stiff:    { 4: 'Not at all', 3: 'Mildly', 2: 'Moderately', 1: 'Very', 0: 'Extremely' },
+  diff:     { 4: 'No difficulty', 3: 'Minimal difficulty', 2: 'Moderate difficulty', 1: 'Extreme difficulty', 0: 'Unable to do' },
+  lock:     { 1: 'No', 0: 'Yes' }
+};
+const TIMEPOINT_TEXT = { w2: '2 weeks', w6: '6 weeks', w12: '12 weeks', w25: '25 weeks (6 months)', w52: '52 weeks (1 year)' };
+const GRAFT_TEXT = { unsure: 'Not sure', hamstring: 'Hamstring tendon', bpb: 'Patellar tendon (BTB)', quad: 'Quadriceps tendon', allograft: 'Donor graft (allograft)' };
+
+const COL_SCORE = 'IKDC score (0-100)';
+const COL_POSTOP_DAY = 'Post-op day';
+const COL_KEY = 'Submission ID';
+const COLUMNS = [
+  'Received (Thai time)',
+  'HN',
+  'Timepoint',
+  'Assessment date',
+  'Surgery date',
+  COL_POSTOP_DAY,
+  'Graft',
+  'Meniscus repair',
+  COL_SCORE,              // SERVER-COMPUTED, never trusts the client-sent score
+  ...QUESTIONS.map(q => q.header),
+  'Answers (raw points)', // for audit / re-scoring
+  COL_KEY                 // client-generated UUID, used to drop duplicate submissions
+];
+// Everything except the two numeric columns is stored as plain text — see writeRow_().
+const TEXT_COLUMNS = COLUMNS.filter(name => name !== COL_POSTOP_DAY && name !== COL_SCORE);
+
+// The earlier, machine-style layout. A tab in exactly this layout is
+// converted to the readable one automatically on the next submission.
+const V1_COLUMNS = ['ReceivedAt', 'IdempotencyKey', 'HN', 'Timepoint', 'AssessmentDate', 'SurgeryDate',
+  'PostopDay', 'Graft', 'MeniscusRepair', 'Score', 'AnswersJson'];
 
 // Per-HN and global rate limits. Tune to your real patient volume (50-100
 // patients, a handful of timepoints each) — these are deliberately generous
@@ -260,27 +310,7 @@ function doPost(e) {
     }
 
     const score = computeIkdcScoreServerSide(body.answers);
-    const row = [
-      new Date().toISOString(),
-      body.idempotencyKey,
-      body.hn,
-      body.timepoint,
-      body.date,
-      body.surgeryDate,
-      body.postopDay,
-      body.graft,
-      body.meniscusRepair,
-      score,
-      JSON.stringify(body.answers)
-    ];
-    const target = sheet.getRange(sheet.getLastRow() + 1, 1, 1, COLUMNS.length);
-    // Plain-text format on every string column BEFORE writing: otherwise
-    // Sheets auto-converts values (an HN like "000123" becomes the number
-    // 123 and loses its leading zeros; dates become date serials) and would
-    // interpret any string starting with "=" as a formula. Only PostopDay
-    // and Score stay numeric.
-    target.setNumberFormats([COLUMNS.map(name => TEXT_COLUMNS.indexOf(name) !== -1 ? '@' : '0')]);
-    target.setValues([row]);
+    writeRows_(sheet, sheet.getLastRow() + 1, [buildRow_(body, score, new Date())]);
 
     return jsonOut_({ ok: true, alreadyRecorded: false, score: score });
   } catch (err) {
@@ -318,8 +348,9 @@ function handleGet_(e) {
     if (!checkAndBumpRateLimit_(cache, 'rl_status_global', 60, 300)) {
       return jsonOut_({ ok: false, error: 'rate_limited_global' });
     }
-    const sheet = getSheet_();
-    const found = !!findRowByKey_(sheet, key);
+    // Read-only: never creates/converts the tab here (doGet doesn't hold the lock).
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    const found = !!(sheet && findRowByKey_(sheet, key));
     return jsonOut_({ ok: true, found: found });
   }
 
@@ -328,42 +359,138 @@ function handleGet_(e) {
 
 /* ============================= SHEET HELPERS ============================= */
 
-// Returns the results tab, creating it (with headers) if it doesn't exist
-// yet. Refuses to touch a tab of the same name that holds something else —
-// e.g. results from the previous version of this script in a different
-// column layout — rather than relabel or append into it.
+// Returns the results tab, ready to write to:
+//  - missing or empty  -> created with the readable headings;
+//  - old machine-style layout written by the previous version of this
+//    script -> converted in place to the readable layout (rows kept);
+//  - anything else -> left untouched, with an error explaining what to change.
+// Only called from doPost/setup, which hold the script lock.
 function getSheet_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+    writeHeader_(sheet);
     return sheet;
   }
-  const header = sheet.getRange(1, 1, 1, COLUMNS.length).getValues()[0];
-  const empty = header.every(v => v === '' || v === null);
-  if (empty && sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+  if (sheet.getLastRow() === 0) {
+    writeHeader_(sheet);
     return sheet;
   }
-  const matches = COLUMNS.every((name, i) => header[i] === name);
-  if (!matches) {
-    throw new Error('Tab "' + SHEET_NAME + '" already exists with a different layout (row 1: ' +
-      JSON.stringify(header) + '). Not writing into it. Change SHEET_NAME at the top of this ' +
-      'script to a new tab name (e.g. "IKDC_v2"), save, and redeploy.');
+  const header = readHeader_(sheet);
+  if (startsWith_(header, COLUMNS)) return sheet;
+  const extraColumnsUsed = header.slice(V1_COLUMNS.length).some(v => v !== '' && v !== null);
+  if (startsWith_(header, V1_COLUMNS) && !extraColumnsUsed) {
+    convertV1Rows_(sheet);
+    return sheet;
   }
-  return sheet;
+  throw new Error('Tab "' + SHEET_NAME + '" already exists with a different layout (row 1: ' +
+    JSON.stringify(header.slice(0, 12)) + '). Not writing into it. Change SHEET_NAME at the top of this ' +
+    'script to a new tab name (e.g. "IKDC_v2"), save, and redeploy.');
 }
 
-// Linear scan is fine at this scale (50-100 patients x 5 timepoints = a few
-// hundred rows, at most). Re-check this if patient volume grows an order of
-// magnitude — at that point, keep a separate small "seen keys" sheet/cache
-// instead of scanning the whole data sheet on every write.
+function readHeader_(sheet) {
+  const n = sheet.getLastColumn();
+  return n ? sheet.getRange(1, 1, 1, n).getValues()[0] : [];
+}
+function startsWith_(header, cols) {
+  return cols.every((name, i) => header[i] === name);
+}
+function ensureColumns_(sheet, n) {
+  const max = sheet.getMaxColumns();
+  if (max < n) sheet.insertColumnsAfter(max, n - max);
+}
+function writeHeader_(sheet) {
+  ensureColumns_(sheet, COLUMNS.length);
+  sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+  formatSheet_(sheet);
+}
+function formatSheet_(sheet) {
+  sheet.getRange(1, 1, 1, COLUMNS.length)
+    .setFontWeight('bold').setWrap(true).setVerticalAlignment('top').setBackground('#EEF2F8');
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(2);                               // date + HN stay visible while scrolling
+  sheet.setColumnWidths(1, 9, 120);
+  sheet.setColumnWidths(10, QUESTIONS.length, 170);
+}
+
+function answerText_(q, v) {
+  if (typeof v !== 'number') return '';
+  if (q.kind === 'scale') return v + ' / 10';
+  const text = ANSWER_TEXT[q.kind][v];
+  if (text === undefined) return String(v);
+  return q.kind === 'lock' ? text : text + ' (' + v + ')'; // points in brackets
+}
+
+// One readable row, in COLUMNS order. `received` is a Date, or the original
+// text when converting an old row whose timestamp can't be parsed.
+function buildRow_(sub, score, received) {
+  const answers = sub.answers || {};
+  return [
+    received instanceof Date ? Utilities.formatDate(received, TIME_ZONE, 'yyyy-MM-dd HH:mm') : String(received || ''),
+    String(sub.hn || ''),
+    TIMEPOINT_TEXT[sub.timepoint] || String(sub.timepoint || ''),
+    String(sub.date || ''),
+    String(sub.surgeryDate || ''),
+    typeof sub.postopDay === 'number' && isFinite(sub.postopDay) ? sub.postopDay : '',
+    GRAFT_TEXT[sub.graft] || String(sub.graft || ''),
+    sub.meniscusRepair === 'protected' ? 'Yes' : sub.meniscusRepair === 'none' ? 'No' : String(sub.meniscusRepair || ''),
+    typeof score === 'number' ? score : '',
+    ...QUESTIONS.map(q => answerText_(q, answers[q.id])),
+    JSON.stringify(answers),
+    String(sub.idempotencyKey || '')
+  ];
+}
+
+// Plain-text format on every string column BEFORE writing: otherwise Sheets
+// auto-converts values (an HN like "000123" becomes the number 123 and loses
+// its leading zeros; dates become date serials) and would interpret any
+// string starting with "=" as a formula. Only post-op day and score stay numeric.
+function writeRows_(sheet, startRow, rows) {
+  if (!rows.length) return;
+  ensureColumns_(sheet, COLUMNS.length);
+  const range = sheet.getRange(startRow, 1, rows.length, COLUMNS.length);
+  const formats = COLUMNS.map(name => TEXT_COLUMNS.indexOf(name) !== -1 ? '@' : '0');
+  range.setNumberFormats(rows.map(() => formats));
+  range.setValues(rows);
+}
+
+// Rewrites rows stored by the previous version of this script (one JSON blob
+// of answers) into the readable layout. Every row is kept; the score is
+// recomputed from its answers.
+function convertV1Rows_(sheet) {
+  const last = sheet.getLastRow();
+  const old = last >= 2 ? sheet.getRange(2, 1, last - 1, V1_COLUMNS.length).getValues() : [];
+  const rows = old.map(r => {
+    let answers = null;
+    try { answers = JSON.parse(r[10]); } catch (e) { /* keep the raw text below */ }
+    const received = new Date(r[0]);
+    const sub = {
+      idempotencyKey: r[1], hn: r[2], timepoint: r[3], date: r[4], surgeryDate: r[5],
+      postopDay: r[6] === '' ? '' : Number(r[6]), graft: r[7], meniscusRepair: r[8], answers: answers || {}
+    };
+    const row = buildRow_(sub, answers ? computeIkdcScoreServerSide(answers) : r[9], isNaN(received.getTime()) ? r[0] : received);
+    if (!answers) row[COLUMNS.indexOf('Answers (raw points)')] = String(r[10] || '');
+    return row;
+  });
+  sheet.getRange(1, 1, last, V1_COLUMNS.length).clearContent();
+  writeHeader_(sheet);
+  writeRows_(sheet, 2, rows);
+  console.log('Converted ' + rows.length + ' existing row(s) in "' + SHEET_NAME + '" to the readable layout.');
+}
+
+// Finds a submission by its ID in either layout (read-only, safe without the
+// lock). Linear scan is fine at this scale (50-100 patients x 5 timepoints).
 function findRowByKey_(sheet, key) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return null;
-  const keyCol = COLUMNS.indexOf('IdempotencyKey') + 1;
-  const values = sheet.getRange(2, keyCol, lastRow - 1, 1).getValues();
+  const header = readHeader_(sheet);
+  let col = header.indexOf(COL_KEY);
+  if (col === -1) col = header.indexOf('IdempotencyKey'); // old layout, not converted yet
+  // A tab this script doesn't manage: "not found" would wrongly tell the app
+  // it's safe to re-send, so report an error instead.
+  if (col === -1) throw new Error('Tab "' + SHEET_NAME + '" has no submission ID column — not a tab this script manages.');
+  const values = sheet.getRange(2, col + 1, lastRow - 1, 1).getValues();
   for (let i = 0; i < values.length; i++) {
     if (values[i][0] === key) return i + 2;
   }
@@ -383,7 +510,10 @@ function jsonOut_(obj) {
  * it stops with an error explaining what to change instead.
  */
 function setupSheetHeaders() {
-  const sheet = getSheet_();
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  let sheet;
+  try { sheet = getSheet_(); formatSheet_(sheet); } finally { lock.releaseLock(); }
   Logger.log('Ready: tab "' + sheet.getName() + '" in "' + SpreadsheetApp.getActiveSpreadsheet().getName() + '".');
 }
 
