@@ -9,8 +9,8 @@
   here: browsers ignore frame-ancestors when CSP is delivered via <meta>
   (only an HTTP response header enforces it — setting it here would do
   nothing but log a console warning on every load). Real anti-framing comes
-  from the headers configured at the hosting layer — see _headers /
-  vercel.json at the repo root. Everything below IS enforced from a <meta>
+  from the headers configured at the hosting layer — see vercel.json at
+  the repo root. Everything below IS enforced from a <meta>
   tag and meaningfully restricts script/connect/object/base regardless.
 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self' https://script.google.com; object-src 'none'; base-uri 'none'; form-action 'self'">
@@ -563,6 +563,7 @@
       <label data-t="onboardHNLabel">Hospital Number (HN)</label>
       <input type="text" id="input-hn" inputmode="numeric" autocomplete="off">
       <div class="hint" data-t="onboardHNHint">Helps hospital staff find your records quickly.</div>
+      <div class="hint" id="hn-validation" style="color:var(--danger);"></div>
     </div>
 
     <div class="field">

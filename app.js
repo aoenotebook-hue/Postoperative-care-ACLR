@@ -46,6 +46,7 @@ en: {
   consentCheckboxLabel:"I have read and agree to the above.",
   consentValidation:"Please confirm to continue.",
   dateRequiredValidation:"Please enter your surgery date to continue.",
+  hnFormatValidation:"Please check your HN — use only letters, numbers, - or /, up to 20 characters.",
   dateRangeValidation:"Please check that date — it should be within the last 5 years and no more than a year from now.",
   addHomeTitle:"Add to Home Screen?",
   addHomeBody:"Add this app to your home screen for one-tap access anytime, just like a regular app.",
@@ -223,6 +224,7 @@ en: {
   ikdcSyncPending:"Saved on this device — sending to your care team…",
   ikdcSyncConfirmed:"Received by your care team",
   ikdcSyncRetrying:"Couldn't confirm yet — will keep trying",
+  ikdcSyncNeedsHn:"Saved on this device only. Add your HN in \"Edit your surgery details\" to send it to your care team.",
   ikdcTimepointLabels:{ w2:"2-week", w6:"6-week", w12:"12-week", w25:"25-week", w52:"52-week (1-year)" },
   ikdcSectionSymptoms:"Symptoms",
   ikdcSectionSports:"Sports Activity",
@@ -479,6 +481,7 @@ th: {
   consentCheckboxLabel:"ข้าพเจ้าได้อ่านและยินยอมตามข้อความข้างต้น",
   consentValidation:"กรุณายืนยันเพื่อดำเนินการต่อ",
   dateRequiredValidation:"กรุณาระบุวันที่ผ่าตัดเพื่อดำเนินการต่อ",
+  hnFormatValidation:"กรุณาตรวจสอบหมายเลข HN — ใช้ได้เฉพาะตัวอักษร ตัวเลข เครื่องหมาย - หรือ / ไม่เกิน 20 ตัว",
   dateRangeValidation:"กรุณาตรวจสอบวันที่อีกครั้ง ควรอยู่ภายใน 5 ปีที่ผ่านมา และไม่เกิน 1 ปีข้างหน้า",
   addHomeTitle:"เพิ่มลงหน้าจอหลักหรือไม่?",
   addHomeBody:"เพิ่มแอปนี้ลงหน้าจอหลักของท่าน เพื่อเปิดใช้งานได้ทันทีเหมือนแอปทั่วไป",
@@ -646,6 +649,7 @@ th: {
   ikdcSyncPending:"บันทึกในเครื่องแล้ว — กำลังส่งให้ทีมผู้ดูแล…",
   ikdcSyncConfirmed:"ทีมผู้ดูแลได้รับข้อมูลแล้ว",
   ikdcSyncRetrying:"ยังไม่สามารถยืนยันได้ — ระบบจะลองส่งใหม่ให้อัตโนมัติ",
+  ikdcSyncNeedsHn:"บันทึกไว้ในเครื่องนี้เท่านั้น กรุณาเพิ่มหมายเลข HN ที่ \"แก้ไขข้อมูลการผ่าตัดของท่าน\" เพื่อส่งให้ทีมผู้ดูแล",
   ikdcTimepointLabels:{ w2:"2 สัปดาห์", w6:"6 สัปดาห์", w12:"12 สัปดาห์", w25:"25 สัปดาห์", w52:"52 สัปดาห์ (1 ปี)" },
   ikdcSectionSymptoms:"อาการ",
   ikdcSectionSports:"กิจกรรมกีฬา",
@@ -979,12 +983,17 @@ let STATE = {
   logDate:null, doneIds:[],
   metricLog:{},   // { quadLSI:[{d:'2026-08-01', v:85}, ...] } — dated so we can chart it
   flags:{},       // { runCleared:'yes', ... }
-  ikdc:{},        // { w2:{date, answers, score, synced}, w6:{...}, w12:{...}, w25:{...}, w52:{...} }
+  ikdc:{},        // { w2:{date, answers, score, idempotencyKey, syncStatus}, w6:{...}, ... w52:{...} }
   consentGiven:false, homeScreenPromptShown:false
 };
 let currentExPhase = 0;
 
-function todayISO(){ return new Date().toISOString().slice(0,10); }
+// Local calendar date, not UTC — toISOString() would roll the day over at
+// 07:00 in Thailand (UTC+7) instead of midnight.
+function localISO(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function todayISO(){ return localISO(new Date()); }
 
 function checkDayRollover(){
   if(STATE.logDate !== todayISO()){
@@ -1003,6 +1012,7 @@ async function loadState(){
   if(!STATE.metricLog) STATE.metricLog = {};
   if(!STATE.flags) STATE.flags = {};
   if(!STATE.ikdc) STATE.ikdc = {};
+  STATE.hn = normalizeHn(STATE.hn); // HNs saved before validation existed may carry stray spaces/Thai digits
   migrateIkdcSyncFields();
   checkDayRollover();
 }
@@ -1021,6 +1031,10 @@ function migrateIkdcSyncFields(){
     if(!entry.idempotencyKey) entry.idempotencyKey = genUuidV4();
     if(!entry.syncStatus) entry.syncStatus = entry.synced ? 'confirmed' : 'pending';
     delete entry.synced;
+    // An entry already in 'retrying' was sent at least once by an earlier
+    // build that didn't track this — assume it reached the server so it
+    // isn't blindly re-sent to a backend that can't dedupe.
+    if(entry.posted === undefined) entry.posted = entry.syncStatus === 'retrying';
   }
 }
 async function saveState(){
@@ -1206,7 +1220,9 @@ function ikdcSyncStatusHtml(){
   if(!pendingKeys.length) return '';
   const mostRecent = pendingKeys[pendingKeys.length-1];
   const entry = STATE.ikdc[mostRecent];
-  const label = entry.syncStatus === 'retrying' ? c.ikdcSyncRetrying : c.ikdcSyncPending;
+  const label = !isValidHn(STATE.hn) ? c.ikdcSyncNeedsHn
+    : entry.syncStatus === 'retrying' ? c.ikdcSyncRetrying
+    : c.ikdcSyncPending;
   return `<div class="ikdc-sync-status" id="ikdc-sync-status">
     <span class="ikdc-sync-dot"></span>${label}
   </div>`;
@@ -1306,7 +1322,8 @@ async function submitIkdcForm(){
     answers: Object.assign({}, ikdcAnswers),
     score,
     idempotencyKey: genUuidV4(),
-    syncStatus: 'pending' // 'pending' | 'confirmed' — see syncOneIkdc()
+    syncStatus: 'pending', // 'pending' | 'retrying' | 'confirmed' — see syncOneIkdc()
+    posted: false          // true once a POST has reached the server
   };
   saveState();
   closeIkdcForm();
@@ -1511,15 +1528,23 @@ function fetchWithTimeout(url, opts){
   const timer = setTimeout(()=>ctrl.abort(), IKDC_SYNC_TIMEOUT_MS);
   return fetch(url, Object.assign({}, opts, {signal: ctrl.signal})).finally(()=>clearTimeout(timer));
 }
+// Post-op day on which the assessment was taken — not "today", since an
+// upload can be retried days after the survey was actually filled in.
+function postopDayOn(isoDate){
+  if(!STATE.surgeryDate) return null;
+  const surgery = new Date(STATE.surgeryDate+'T00:00:00');
+  const on = new Date(isoDate+'T00:00:00');
+  return Math.round((on - surgery)/86400000) + 1;
+}
 async function postIkdcSubmission(key, entry){
   const payload = {
     type: 'ikdc',
     idempotencyKey: entry.idempotencyKey,
     timepoint: key,
     date: entry.date,
-    hn: STATE.hn || "",
+    hn: STATE.hn,
     surgeryDate: STATE.surgeryDate || "",
-    postopDay: postopDay(),
+    postopDay: postopDayOn(entry.date),
     graft: STATE.graft,
     meniscusRepair: STATE.meniscus === "yes" ? STATE.protection : "none",
     score: entry.score,
@@ -1536,43 +1561,66 @@ async function postIkdcSubmission(key, entry){
 // Reads a real, readable ack. GET requests to an Apps Script /exec URL are,
 // in practice, more reliably readable cross-origin than POST responses —
 // see backend/ikdc-sync.gs for the server side and how to verify this
-// against your actual deployment. Returns true only on an explicit,
-// readable {found:true} — anything else (including a network/CORS error)
-// returns false and the caller keeps the entry pending for the next retry.
+// against your actual deployment. Returns:
+//   'found'     — the backend has this submission; safe to mark confirmed.
+//   'not_found' — the backend answered in the new contract's format and does
+//                 NOT have it. This also proves the deduplicating backend is
+//                 live, so re-sending is safe.
+//   'unknown'   — offline, blocked, rate-limited, or a backend that doesn't
+//                 speak this contract (e.g. the pre-hardening Apps Script).
 async function confirmSyncStatus(idempotencyKey){
   try{
     const url = SHEET_WEBHOOK_URL + '?action=status&key=' + encodeURIComponent(idempotencyKey);
     const res = await fetchWithTimeout(url, { method:'GET' }); // defaults to mode:'cors'
-    if(!res.ok) return false;
+    if(!res.ok) return 'unknown';
     const data = await res.json();
-    return data && data.ok === true && data.found === true;
+    if(data && data.ok === true && data.found === true) return 'found';
+    if(data && data.ok === true && data.found === false) return 'not_found';
+    return 'unknown';
   }catch(err){
     console.warn('IKDC status check failed, will retry later:', err);
-    return false;
+    return 'unknown';
   }
 }
+
+// Several triggers (submit, app load, tab refocus, coming back online) can
+// fire close together; one upload per entry at a time is enough.
+const ikdcSyncInFlight = new Set();
 
 async function syncOneIkdc(key){
   const entry = STATE.ikdc[key];
   if(!entry || entry.syncStatus === 'confirmed') return;
   if(!SHEET_WEBHOOK_URL) return; // backend not configured yet — entry stays saved locally
-  if(!entry.idempotencyKey) entry.idempotencyKey = genUuidV4(); // migrated pre-idempotency entry
+  // The backend rejects a missing/malformed HN, so sending one would just
+  // fail forever. Wait until the patient adds/fixes it (the status line
+  // tells them how); saveOnboard() retries as soon as they do.
+  if(!isValidHn(STATE.hn)){ renderIkdcCard(); return; }
+  if(ikdcSyncInFlight.has(key)) return;
+  ikdcSyncInFlight.add(key);
+  try{
+    if(!entry.idempotencyKey) entry.idempotencyKey = genUuidV4(); // migrated pre-idempotency entry
 
-  try{ await postIkdcSubmission(key, entry); }
-  catch(err){ console.warn('IKDC submit failed, will retry next app load:', err); }
-
-  const confirmed = await confirmSyncStatus(entry.idempotencyKey);
-  if(confirmed){
-    entry.syncStatus = 'confirmed';
-  } else if(entry.syncStatus === 'pending'){
-    entry.syncStatus = 'retrying'; // first attempt didn't confirm; distinguishes from "just submitted"
+    // Once a POST has reached the server, sending it again is only safe if
+    // the backend is known to dedupe on idempotencyKey. The pre-hardening
+    // Apps Script appends a row for every POST and can't answer status
+    // checks, so against it a blind re-send on every app open would pile up
+    // duplicate rows. Re-send only after the backend has explicitly said
+    // "not found" (which only the deduplicating backend can say).
+    let status = entry.posted ? await confirmSyncStatus(entry.idempotencyKey) : 'unknown';
+    if(status !== 'found' && (!entry.posted || status === 'not_found')){
+      try{
+        await postIkdcSubmission(key, entry); // resolves only if the request reached the server
+        entry.posted = true;
+      }catch(err){ console.warn('IKDC submit failed, will retry later:', err); }
+      status = await confirmSyncStatus(entry.idempotencyKey);
+    }
+    if(status === 'found') entry.syncStatus = 'confirmed';
+    else if(entry.syncStatus === 'pending') entry.syncStatus = 'retrying';
+    saveState();
+    renderIkdcCard();
+  } finally {
+    ikdcSyncInFlight.delete(key);
   }
-  // 'retrying' stays 'retrying' until confirmed — next trySyncPendingIkdc()
-  // call retries both the POST and the status check. The POST is safe to
-  // repeat: the backend dedupes on idempotencyKey, so a retried submission
-  // never creates a second row once the first one actually landed.
-  saveState();
-  renderIkdcCard();
 }
 async function trySyncPendingIkdc(){
   for(const k in STATE.ikdc){ if(STATE.ikdc[k].syncStatus !== 'confirmed') await syncOneIkdc(k); }
@@ -1945,8 +1993,8 @@ const DATE_MIN_DAYS_PAST = 365*5, DATE_MAX_DAYS_AHEAD = 365;
 function dateBounds(){
   const day = 86400000, now = Date.now();
   return {
-    min: new Date(now - DATE_MIN_DAYS_PAST*day).toISOString().slice(0,10),
-    max: new Date(now + DATE_MAX_DAYS_AHEAD*day).toISOString().slice(0,10)
+    min: localISO(new Date(now - DATE_MIN_DAYS_PAST*day)),
+    max: localISO(new Date(now + DATE_MAX_DAYS_AHEAD*day))
   };
 }
 function openOnboard(prefill){
@@ -1966,14 +2014,30 @@ function openOnboard(prefill){
   document.getElementById('input-consent').checked = false;
   document.getElementById('consent-validation').textContent = '';
   document.getElementById('date-validation').textContent = '';
+  document.getElementById('hn-validation').textContent = '';
   document.getElementById('onboard').classList.remove('hidden');
 }
 function closeOnboard(){ document.getElementById('onboard').classList.add('hidden'); renderAll(); }
+// Must accept exactly what backend/ikdc-sync.gs's HN_RE accepts, or uploads
+// with this HN get rejected server-side forever.
+const HN_PATTERN = /^[A-Za-z0-9][A-Za-z0-9/-]{0,19}$/;
+function normalizeHn(raw){
+  return String(raw || '')
+    .trim()
+    .replace(/[๐-๙]/g, ch => String(ch.charCodeAt(0) - 0x0E50)); // Thai digits -> ASCII
+}
+function isValidHn(hn){ return HN_PATTERN.test(hn); }
+
 function saveOnboard(){
   const c = CONTENT[STATE.lang];
   const d = document.getElementById('input-surgery-date').value;
   document.getElementById('date-validation').textContent = '';
   document.getElementById('consent-validation').textContent = '';
+  document.getElementById('hn-validation').textContent = '';
+  const hn = normalizeHn(document.getElementById('input-hn').value);
+  if(hn && !isValidHn(hn)){
+    document.getElementById('hn-validation').textContent = c.hnFormatValidation; return;
+  }
   if(!d && !STATE.surgeryDate){
     document.getElementById('date-validation').textContent = c.dateRequiredValidation; return;
   }
@@ -1988,7 +2052,7 @@ function saveOnboard(){
   }
   STATE.consentGiven = true;
   STATE.surgeryDate = d || STATE.surgeryDate;
-  STATE.hn         = document.getElementById('input-hn').value;
+  STATE.hn         = hn;
   STATE.graft      = document.getElementById('input-graft').value;
   STATE.meniscus   = document.getElementById('input-meniscus').value;
   STATE.protection = STATE.meniscus === "yes" ? "protected" : "standard";
@@ -1996,6 +2060,7 @@ function saveOnboard(){
   saveState();
   closeOnboard();
   maybeShowAddHomePrompt();
+  trySyncPendingIkdc(); // a newly added/corrected HN can unblock surveys waiting to upload
 }
 
 /* ============================= RENDER ALL ============================= */

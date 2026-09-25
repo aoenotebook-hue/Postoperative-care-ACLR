@@ -96,6 +96,8 @@ const COLUMNS = [
   'Score',            // SERVER-COMPUTED, never trusts the client-sent score
   'AnswersJson'       // raw answers object, JSON-stringified, for audit/re-scoring later
 ];
+// Every column except the two numeric ones is stored as plain text — see doPost().
+const TEXT_COLUMNS = COLUMNS.filter(name => name !== 'PostopDay' && name !== 'Score');
 
 // Per-HN and global rate limits. Tune to your real patient volume (50-100
 // patients, a handful of timepoints each) — these are deliberately generous
@@ -127,7 +129,9 @@ const IKDC_RAW_MAX = 87;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const HN_RE = /^[A-Za-z0-9/-]{1,20}$/;
+// Must start with a letter/digit: a leading "-" would let Sheets read the
+// cell as a number or formula. Mirrors HN_PATTERN in app.js — keep in sync.
+const HN_RE = /^[A-Za-z0-9][A-Za-z0-9/-]{0,19}$/;
 
 /* ============================= VALIDATION ============================= */
 
@@ -231,14 +235,16 @@ function doPost(e) {
     if (!checkAndBumpRateLimit_(cache, 'rl_global', RATE_LIMIT_GLOBAL_WINDOW_SEC, RATE_LIMIT_GLOBAL_MAX)) {
       return jsonOut_({ ok: false, error: 'rate_limited_global' });
     }
-    if (!checkAndBumpRateLimit_(cache, 'rl_hn_' + body.hn, RATE_LIMIT_PER_HN_WINDOW_SEC, RATE_LIMIT_PER_HN_MAX)) {
-      return jsonOut_({ ok: false, error: 'rate_limited_hn' });
-    }
-
+    // Dedup before the per-HN limit: a retry of something already stored is
+    // harmless and shouldn't eat into that patient's allowance.
     const sheet = getSheet_();
     const existingRow = findRowByKey_(sheet, body.idempotencyKey);
     if (existingRow) {
       return jsonOut_({ ok: true, alreadyRecorded: true });
+    }
+
+    if (!checkAndBumpRateLimit_(cache, 'rl_hn_' + body.hn, RATE_LIMIT_PER_HN_WINDOW_SEC, RATE_LIMIT_PER_HN_MAX)) {
+      return jsonOut_({ ok: false, error: 'rate_limited_hn' });
     }
 
     const score = computeIkdcScoreServerSide(body.answers);
@@ -255,7 +261,14 @@ function doPost(e) {
       score,
       JSON.stringify(body.answers)
     ];
-    sheet.getRange(sheet.getLastRow() + 1, 1, 1, COLUMNS.length).setValues([row]);
+    const target = sheet.getRange(sheet.getLastRow() + 1, 1, 1, COLUMNS.length);
+    // Plain-text format on every string column BEFORE writing: otherwise
+    // Sheets auto-converts values (an HN like "000123" becomes the number
+    // 123 and loses its leading zeros; dates become date serials) and would
+    // interpret any string starting with "=" as a formula. Only PostopDay
+    // and Score stay numeric.
+    target.setNumberFormats([COLUMNS.map(name => TEXT_COLUMNS.indexOf(name) !== -1 ? '@' : '0')]);
+    target.setValues([row]);
 
     return jsonOut_({ ok: true, alreadyRecorded: false, score: score });
   } finally {
