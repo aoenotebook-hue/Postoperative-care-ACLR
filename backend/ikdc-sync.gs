@@ -8,13 +8,22 @@
  * access, no Apps Script Editor access, and did not (and cannot) deploy,
  * run, or test this against the real backend or the real patient sheet.
  *
- * To use it: open your existing Apps Script project (Extensions > Apps
- * Script from the Google Sheet SHEET_WEBHOOK_URL points at), replace the
- * current doPost/doGet with the contents of this file, adjust SHEET_NAME
- * and COLUMNS below to match your actual sheet, run setupSheetHeaders()
- * once from the Apps Script editor, then re-deploy ("Manage deployments" >
- * edit > New version) so the /exec URL picks up the change. Test against a
- * COPY of your sheet first, not the production one.
+ * To deploy (test on a COPY of your sheet first):
+ *  1. From the Google Sheet the webhook writes to: Extensions > Apps Script.
+ *  2. Replace the whole existing script with this file and save. The
+ *     project must use the V8 runtime (Project Settings > "Enable Chrome V8
+ *     runtime") — otherwise saving fails with a syntax error.
+ *  3. Optional: run setupSheetHeaders() once (function dropdown > Run) to
+ *     create the SHEET_NAME tab and grant permissions. If a tab with that
+ *     name already holds other data (e.g. results from the old script), it
+ *     stops with an error instead of touching it — set SHEET_NAME to a new
+ *     name such as "IKDC_v2" and run it again. Don't edit COLUMNS.
+ *  4. Deploy > Manage deployments > pencil on the EXISTING deployment >
+ *     Version: New version > Deploy (Execute as: Me, Who has access:
+ *     Anyone). Never "New deployment": that creates a different /exec URL
+ *     and the app would keep sending to the old one.
+ *  5. Open <your /exec URL>?action=status&key=00000000-0000-4000-8000-000000000000
+ *     in a browser: {"ok":true,"found":false} means the new script is live.
  *
  * What changed vs. the likely current behavior, and why:
  *
@@ -274,12 +283,25 @@ function doPost(e) {
     target.setValues([row]);
 
     return jsonOut_({ ok: true, alreadyRecorded: false, score: score });
+  } catch (err) {
+    // Shows up under Executions in the Apps Script editor.
+    console.error('doPost failed: ' + (err && err.stack || err));
+    return jsonOut_({ ok: false, error: 'server_error' });
   } finally {
     lock.releaseLock();
   }
 }
 
 function doGet(e) {
+  try {
+    return handleGet_(e);
+  } catch (err) {
+    console.error('doGet failed: ' + (err && err.stack || err));
+    return jsonOut_({ ok: false, error: 'server_error' });
+  }
+}
+
+function handleGet_(e) {
   const action = e.parameter.action;
 
   if (!action) {
@@ -306,10 +328,30 @@ function doGet(e) {
 
 /* ============================= SHEET HELPERS ============================= */
 
+// Returns the results tab, creating it (with headers) if it doesn't exist
+// yet. Refuses to touch a tab of the same name that holds something else —
+// e.g. results from the previous version of this script in a different
+// column layout — rather than relabel or append into it.
 function getSheet_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) throw new Error('Sheet "' + SHEET_NAME + '" not found — run setupSheetHeaders() first.');
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+    return sheet;
+  }
+  const header = sheet.getRange(1, 1, 1, COLUMNS.length).getValues()[0];
+  const empty = header.every(v => v === '' || v === null);
+  if (empty && sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+    return sheet;
+  }
+  const matches = COLUMNS.every((name, i) => header[i] === name);
+  if (!matches) {
+    throw new Error('Tab "' + SHEET_NAME + '" already exists with a different layout (row 1: ' +
+      JSON.stringify(header) + '). Not writing into it. Change SHEET_NAME at the top of this ' +
+      'script to a new tab name (e.g. "IKDC_v2"), save, and redeploy.');
+  }
   return sheet;
 }
 
@@ -334,36 +376,33 @@ function jsonOut_(obj) {
 }
 
 /**
- * Run this ONCE from the Apps Script editor (select it from the function
- * dropdown, click Run) to create/reset the header row on a fresh sheet.
- * Does nothing destructive to existing data rows below the header.
+ * Optional: run this ONCE from the Apps Script editor (select it in the
+ * function dropdown, click Run) to create the results tab and grant the
+ * script permission up front. The first submission would create the tab
+ * anyway. It never overwrites a tab that already holds different data —
+ * it stops with an error explaining what to change instead.
  */
 function setupSheetHeaders() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
-  sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+  const sheet = getSheet_();
+  Logger.log('Ready: tab "' + sheet.getName() + '" in "' + SpreadsheetApp.getActiveSpreadsheet().getName() + '".');
 }
 
 /**
  * How to verify the GET-readability assumption described at the top of
- * this file, against YOUR real deployment, before trusting it:
+ * this file, against YOUR real deployment, before trusting it (after
+ * redeploying as in step 4 at the top — same deployment, new version):
  *
- * 1. Deploy this script as a Web App (Deploy > New deployment > Web app,
- *    Execute as: Me, Who has access: Anyone).
- * 2. From a browser on a DIFFERENT origin than script.google.com (e.g.
- *    open your hosted index.html, or just any other https:// page), open
- *    devtools console and run:
+ * 1. Open the app (https://postoperative-care-aclr.vercel.app) in a
+ *    desktop browser, open devtools > Console, and run:
  *
- *      fetch("<your /exec URL>?action=status&key=00000000-0000-4000-8000-000000000000")
+ *      fetch(SHEET_WEBHOOK_URL + "?action=status&key=00000000-0000-4000-8000-000000000000")
  *        .then(r => r.json()).then(console.log).catch(console.error)
  *
- * 3. If you see a logged object like {ok:true, found:false} — the GET is
- *    readable cross-origin and the client's status-check flow will work
- *    as designed. If you see a network/CORS error instead, the client
- *    will simply keep retrying (it fails safe — never marks a record
- *    confirmed without a readable ack) but you should look into an
- *    alternative (e.g. a small Cloudflare Worker / Vercel serverless
- *    function proxying to this script with explicit CORS headers) rather
- *    than relying on Apps Script's native behavior.
+ * 2. If you see {ok:true, found:false}, the GET is readable cross-origin
+ *    and the app's confirmation flow works as designed. If you see a
+ *    network/CORS error instead, the app fails safe — it never marks a
+ *    survey confirmed without a readable ack, and never re-sends to a
+ *    backend that hasn't proven it dedupes — but surveys will stay
+ *    "not yet confirmed" until that's fixed (e.g. with a small Vercel
+ *    function proxying to this script with explicit CORS headers).
  */
