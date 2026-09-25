@@ -1041,11 +1041,17 @@ function migrateIkdcSyncFields(){
     if(entry.posted === undefined) entry.posted = entry.syncStatus === 'retrying';
   }
 }
+// Set once the patient confirms a reset. From then until the page reloads,
+// nothing may write state back — otherwise a survey upload that finishes
+// during the reload re-saves everything that was just cleared.
+let resetInProgress = false;
 async function saveState(){
+  if(resetInProgress) return;
   try{ localStorage.setItem('aclcare-app-state', JSON.stringify(STATE)); }catch(e){ console.error('save failed', e); }
 }
 function handleResetApp(){
   if(!confirm(CONTENT[STATE.lang].resetConfirm)) return;
+  resetInProgress = true;
   try{ localStorage.removeItem('aclcare-app-state'); }catch(e){ console.error('reset failed', e); }
   location.reload();
 }
