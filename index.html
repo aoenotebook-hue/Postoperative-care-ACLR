@@ -242,6 +242,35 @@
   .onboard-lang button.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(20,30,50,0.12);}
   .metric-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 3px rgba(20,30,50,0.06);}
   .ikdc-sync-status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:8px 4px 14px;}
+  /* Knee survey on the Progress tab */
+  .ikdc-due{border-left:5px solid var(--teal);}
+  .ikdc-due .primary-btn{margin-top:4px;}
+  .ikdc-open-until{font-size:13px;font-weight:600;color:var(--teal);margin:8px 0 12px;}
+  .ikdc-result-head{font-size:13px;font-weight:700;color:var(--navy);}
+  .ikdc-score{display:flex;align-items:baseline;gap:8px;margin:6px 0 2px;}
+  .ikdc-score-num{font-size:44px;font-weight:800;color:var(--navy);line-height:1;}
+  .ikdc-score-of{font-size:13px;color:var(--muted);}
+  .ikdc-change{font-size:13px;font-weight:600;color:var(--muted);}
+  .ikdc-change.up{color:var(--teal);}
+  .ikdc-change.down{color:var(--danger);}
+  .ikdc-explain{font-size:12.5px;margin:8px 0 4px;}
+  .ikdc-suggest-title{font-size:14px;font-weight:700;color:var(--navy);margin-top:10px;}
+  .ikdc-suggest{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.55;}
+  .ikdc-suggest li{margin-bottom:6px;}
+  .ikdc-foot{font-size:11.5px;color:var(--muted);margin:8px 0 0;line-height:1.45;}
+  .ikdc-tl{margin-top:10px;}
+  .ikdc-tl-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:14px;}
+  .ikdc-tl-row:first-child{border-top:none;}
+  .ikdc-tl-dot{width:10px;height:10px;border-radius:50%;background:var(--border);flex-shrink:0;}
+  .ikdc-tl-row.done .ikdc-tl-dot{background:var(--teal);}
+  .ikdc-tl-row.open .ikdc-tl-dot{background:#F5A623;}
+  .ikdc-tl-label{flex:1;font-weight:600;}
+  .ikdc-tl-right{display:flex;align-items:baseline;gap:8px;text-align:right;}
+  .ikdc-tl-score{font-weight:800;color:var(--navy);font-size:16px;}
+  .ikdc-tl-sub{font-size:12.5px;color:var(--muted);}
+  .ikdc-tl-open{font-size:12.5px;font-weight:700;color:#B26A00;}
+  .ikdc-tl-row.missed .ikdc-tl-label{color:var(--muted);}
+  .ikdc-next{font-size:12.5px;margin:8px 0 0;}
   .ikdc-sync-dot{width:7px;height:7px;border-radius:50%;background:#F5A623;flex-shrink:0;animation:ikdc-pulse 1.6s ease-in-out infinite;}
   @keyframes ikdc-pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
   .metric-top{display:flex;align-items:flex-start;gap:12px;}
@@ -475,6 +504,7 @@
 
     <!-- PROGRESS / READINESS -->
     <section class="view" id="view-progress">
+      <div id="ikdc-progress-wrap"></div>
       <div class="card">
         <h2 data-t="progressTitle">Am I Ready?</h2>
         <p class="muted" data-t="progressIntro">The calendar tells us when to check. Your knee tells us when to progress.</p>

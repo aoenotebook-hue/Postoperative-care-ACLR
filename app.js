@@ -216,8 +216,33 @@ en: {
 
   /* ---- IKDC Subjective Knee Evaluation ---- */
   ikdcTitle:"Knee Recovery Survey",
-  ikdcIntro:"A short questionnaire your care team uses to track your knee's recovery. It's asked at 2, 6, 12, 25 and 52 weeks after surgery.",
-  ikdcOverdueNote:"This survey is overdue — please complete it when you can.",
+  ikdcIntro:"A short questionnaire (about 5 minutes) your care team uses to track your knee's recovery. It opens at 2, 6, 12 and 24 weeks after surgery.",
+  ikdcOpenUntil: d => `Open now until ${d}.`,
+  ikdcHomeNudge: label => `Your ${label} survey is ready — it takes about 5 minutes.`,
+  ikdcGoToProgress:"Open Survey",
+  ikdcResultTitle: label => `Your ${label} result`,
+  ikdcScoreOutOf:"out of 100",
+  ikdcScoreExplain:"Higher scores mean better knee function. It's normal to start low and climb over the months.",
+  ikdcChangeUp: (n, label) => `▲ ${n} points since your ${label} survey`,
+  ikdcChangeDown: (n, label) => `▼ ${n} points since your ${label} survey`,
+  ikdcChangeSame: label => `About the same as your ${label} survey`,
+  ikdcSuggestTitle:"Suggestions for you",
+  ikdcSuggest:{
+    locking:"You reported your knee locking or catching. Tell your care team at your next contact — and call them now if your knee gets stuck and won't straighten.",
+    pain:"Pain is still frequent or strong. Ice and raise your leg after exercise, take pain relief as prescribed, and ease off any exercise that causes sharp pain. Mention it at your next visit if it isn't settling.",
+    swelling:"Your knee still feels very stiff or swollen. Keep up ice, elevation and the heel-prop stretch, and do your range-of-motion exercises every day.",
+    givingWay:"You reported your knee giving way even with light activity. Avoid twisting and pivoting movements and tell your care team.",
+    dropped:"Your score is lower than last time. That can happen after a busy week, but tell your care team if you're not sure why or if it keeps dropping.",
+    improved:"Your score has improved since last time — keep going with the exercises for your current recovery phase.",
+    keepGoing:"Keep going with the exercises for your current recovery phase in the Exercises tab."
+  },
+  ikdcSuggestFootnote:"General guidance only — follow your surgeon's and physiotherapist's advice. For warning signs, see the Alert tab.",
+  ikdcProgressTitle:"Your Knee Survey Timeline",
+  ikdcStatusOpen:"Open now",
+  ikdcStatusMissed:"Missed",
+  ikdcStatusUpcoming: d => `Opens ${d}`,
+  ikdcNextSurvey: (label, d) => `Next survey: ${label}, opens ${d}.`,
+  ikdcAllDone:"You've completed all your knee surveys. Thank you!",
   ikdcOpenBtn:"Start Survey",
   ikdcSubmitBtn:"Submit Survey",
   ikdcCancelBtn:"Cancel",
@@ -227,7 +252,7 @@ en: {
   ikdcSyncConfirmed:"Received by your care team",
   ikdcSyncRetrying:"Couldn't confirm yet — will keep trying",
   ikdcSyncNeedsHn:"Saved on this device only. Add your HN in \"Edit your surgery details\" to send it to your care team.",
-  ikdcTimepointLabels:{ w2:"2-week", w6:"6-week", w12:"12-week", w25:"25-week", w52:"52-week (1-year)" },
+  ikdcTimepointLabels:{ w2:"2-week", w6:"6-week", w12:"12-week", w24:"24-week", w25:"25-week", w52:"52-week" }, // w25/w52: earlier schedule, kept for past results
   ikdcSectionSymptoms:"Symptoms",
   ikdcSectionSports:"Sports Activity",
   ikdcSectionFunction:"Function",
@@ -643,8 +668,33 @@ th: {
 
   /* ---- แบบประเมินเข่า IKDC ---- */
   ikdcTitle:"แบบสำรวจการฟื้นตัวของเข่า",
-  ikdcIntro:"แบบสอบถามสั้น ๆ ที่ทีมผู้ดูแลใช้ติดตามการฟื้นตัวของเข่าท่าน โดยจะให้ทำที่ 2, 6, 12, 25 และ 52 สัปดาห์หลังผ่าตัด",
-  ikdcOverdueNote:"แบบประเมินนี้เลยกำหนดแล้ว กรุณาทำเมื่อสะดวก",
+  ikdcIntro:"แบบสอบถามสั้น ๆ (ประมาณ 5 นาที) ที่ทีมผู้ดูแลใช้ติดตามการฟื้นตัวของเข่าท่าน เปิดให้ทำที่ 2, 6, 12 และ 24 สัปดาห์หลังผ่าตัด",
+  ikdcOpenUntil: d => `เปิดให้ทำได้ถึงวันที่ ${d}`,
+  ikdcHomeNudge: label => `แบบสำรวจครั้ง ${label} พร้อมให้ทำแล้ว ใช้เวลาประมาณ 5 นาที`,
+  ikdcGoToProgress:"ไปทำแบบสำรวจ",
+  ikdcResultTitle: label => `ผลการประเมินครั้ง ${label}`,
+  ikdcScoreOutOf:"จาก 100 คะแนน",
+  ikdcScoreExplain:"คะแนนยิ่งสูงหมายถึงเข่าใช้งานได้ดีขึ้น ช่วงแรกคะแนนมักต่ำและจะค่อย ๆ เพิ่มขึ้นในเดือนต่อ ๆ ไป",
+  ikdcChangeUp: (n, label) => `▲ เพิ่มขึ้น ${n} คะแนนจากครั้ง ${label}`,
+  ikdcChangeDown: (n, label) => `▼ ลดลง ${n} คะแนนจากครั้ง ${label}`,
+  ikdcChangeSame: label => `ใกล้เคียงกับครั้ง ${label}`,
+  ikdcSuggestTitle:"คำแนะนำสำหรับท่าน",
+  ikdcSuggest:{
+    locking:"ท่านรายงานว่าเข่ามีอาการล็อกหรือสะดุด กรุณาแจ้งทีมผู้ดูแลเมื่อติดต่อครั้งถัดไป และหากเข่าล็อกจนเหยียดไม่ได้ ให้ติดต่อทีมผู้ดูแลทันที",
+    pain:"ยังมีอาการปวดบ่อยหรือปวดมาก ควรประคบเย็นและยกขาสูงหลังออกกำลังกาย รับประทานยาแก้ปวดตามที่แพทย์สั่ง และลดหรือหยุดท่าบริหารที่ทำให้ปวดแปลบ หากอาการไม่ดีขึ้นให้แจ้งแพทย์ในการนัดครั้งถัดไป",
+    swelling:"เข่ายังตึงหรือบวมมาก ควรประคบเย็น ยกขาสูง ทำท่าวางส้นเท้าบนหมอนเพื่อเหยียดเข่า และทำท่าบริหารเพิ่มการเคลื่อนไหวของเข่าทุกวัน",
+    givingWay:"ท่านรายงานว่าเข่าทรุดหรือหลุดแม้ทำกิจกรรมเบา ๆ ควรหลีกเลี่ยงการบิดหรือหมุนเข่า และแจ้งทีมผู้ดูแล",
+    dropped:"คะแนนต่ำกว่าครั้งก่อน อาจเกิดได้หลังช่วงที่ใช้งานเข่ามาก แต่หากไม่แน่ใจสาเหตุหรือคะแนนลดลงต่อเนื่อง กรุณาแจ้งทีมผู้ดูแล",
+    improved:"คะแนนดีขึ้นจากครั้งก่อน กรุณาทำท่าบริหารตามระยะการฟื้นตัวปัจจุบันอย่างต่อเนื่อง",
+    keepGoing:"กรุณาทำท่าบริหารตามระยะการฟื้นตัวปัจจุบันในแท็บ “ท่าบริหาร” อย่างต่อเนื่อง"
+  },
+  ikdcSuggestFootnote:"เป็นคำแนะนำทั่วไป กรุณาปฏิบัติตามคำแนะนำของแพทย์และนักกายภาพบำบัดของท่าน ดูอาการที่ต้องรีบแจ้งได้ที่แท็บ “แจ้งเตือน”",
+  ikdcProgressTitle:"ลำดับแบบสำรวจการฟื้นตัวของเข่า",
+  ikdcStatusOpen:"เปิดให้ทำแล้ว",
+  ikdcStatusMissed:"พ้นกำหนดแล้ว",
+  ikdcStatusUpcoming: d => `เปิดวันที่ ${d}`,
+  ikdcNextSurvey: (label, d) => `แบบสำรวจครั้งถัดไป: ${label} เปิดวันที่ ${d}`,
+  ikdcAllDone:"ท่านทำแบบสำรวจครบทุกครั้งแล้ว ขอบคุณที่ให้ความร่วมมือ",
   ikdcOpenBtn:"เริ่มทำแบบประเมิน",
   ikdcSubmitBtn:"ส่งแบบประเมิน",
   ikdcCancelBtn:"ยกเลิก",
@@ -654,7 +704,7 @@ th: {
   ikdcSyncConfirmed:"ทีมผู้ดูแลได้รับข้อมูลแล้ว",
   ikdcSyncRetrying:"ยังไม่สามารถยืนยันได้ — ระบบจะลองส่งใหม่ให้อัตโนมัติ",
   ikdcSyncNeedsHn:"บันทึกไว้ในเครื่องนี้เท่านั้น กรุณาเพิ่มหมายเลข HN ที่ \"แก้ไขข้อมูลการผ่าตัดของท่าน\" เพื่อส่งให้ทีมผู้ดูแล",
-  ikdcTimepointLabels:{ w2:"2 สัปดาห์", w6:"6 สัปดาห์", w12:"12 สัปดาห์", w25:"25 สัปดาห์", w52:"52 สัปดาห์ (1 ปี)" },
+  ikdcTimepointLabels:{ w2:"2 สัปดาห์", w6:"6 สัปดาห์", w12:"12 สัปดาห์", w24:"24 สัปดาห์", w25:"25 สัปดาห์", w52:"52 สัปดาห์" },
   ikdcSectionSymptoms:"อาการ",
   ikdcSectionSports:"กิจกรรมกีฬา",
   ikdcSectionFunction:"การใช้งาน",
@@ -987,7 +1037,8 @@ let STATE = {
   logDate:null, doneIds:[],
   metricLog:{},   // { quadLSI:[{d:'2026-08-01', v:85}, ...] } — dated so we can chart it
   flags:{},       // { runCleared:'yes', ... }
-  ikdc:{},        // { w2:{date, answers, score, idempotencyKey, syncStatus}, w6:{...}, ... w52:{...} }
+  ikdc:{},        // { w2:{date, answers, score, idempotencyKey, syncStatus, posted}, w6, w12, w24 }
+  ikdcPrompted:{}, // { w2:true, ... } — survey already brought up automatically once
   consentGiven:false, homeScreenPromptShown:false
 };
 let currentExPhase = 0;
@@ -1016,6 +1067,7 @@ async function loadState(){
   if(!STATE.metricLog) STATE.metricLog = {};
   if(!STATE.flags) STATE.flags = {};
   if(!STATE.ikdc) STATE.ikdc = {};
+  if(!STATE.ikdcPrompted) STATE.ikdcPrompted = {};
   STATE.hn = normalizeHn(STATE.hn); // HNs saved before validation existed may carry stray spaces/Thai digits
   migrateIkdcSyncFields();
   checkDayRollover();
@@ -1150,13 +1202,44 @@ function closeAddHomePrompt(){
  * source a published, validated Thai translation for the Thai copy rather than translating the
  * English text directly. */
 const IKDC_TIMEPOINTS = [
-  { key:'w2',  day:14  },
-  { key:'w6',  day:42  },
-  { key:'w12', day:84  },
-  { key:'w25', day:175 },
-  { key:'w52', day:364 }
+  { key:'w2',  weeks:2  },
+  { key:'w6',  weeks:6  },
+  { key:'w12', weeks:12 },
+  { key:'w24', weeks:24 }
 ];
-const IKDC_WINDOW_OPEN_DAYS = 7; // the due card opens this many days before the target day; no hard close
+// A survey opens on the day its week is reached and stays open this many
+// days. After that it's missed — it never blocks the next one.
+const IKDC_WINDOW_DAYS = 14;
+// Window in post-op day numbers (day 1 = day of surgery, so "2 weeks after
+// surgery" is day 15).
+function ikdcWindow(tp){
+  const open = tp.weeks * 7 + 1;
+  return { open, close: open + IKDC_WINDOW_DAYS - 1 };
+}
+// 'done' | 'open' | 'upcoming' | 'missed'
+function ikdcStatus(tp){
+  if(STATE.ikdc[tp.key]) return 'done';
+  const day = postopDay();
+  if(day === null) return 'upcoming';
+  const w = ikdcWindow(tp);
+  if(day < w.open) return 'upcoming';
+  if(day > w.close) return 'missed';
+  return 'open';
+}
+function postopDayToISO(day){
+  const d = new Date(STATE.surgeryDate + 'T00:00:00');
+  d.setDate(d.getDate() + day - 1);
+  return localISO(d);
+}
+function ikdcLabel(key){ return CONTENT[STATE.lang].ikdcTimepointLabels[key] || key; }
+// Every completed survey, oldest first — including any from the earlier
+// 25/52-week schedule, so past results still show.
+function ikdcCompleted(){
+  return Object.keys(STATE.ikdc)
+    .map(k => Object.assign({ key:k }, STATE.ikdc[k]))
+    .filter(e => typeof e.score === 'number')
+    .sort((a,b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+}
 
 // scale: 'activity5' (5-tier, 4..0), 'stiff5' (5-tier, 4..0), 'diff5' (5-tier, 4..0),
 // 'lock' (No=1/Yes=0), 'vas10'/'func10' (0..10). scored:false items are collected but excluded.
@@ -1187,10 +1270,7 @@ const IKDC_RAW_MAX = 87; // sum of best-case points across all 18 scored items (
 function ikdcDueTimepoint(){
   const day = postopDay();
   if(day === null) return null;
-  for(const tp of IKDC_TIMEPOINTS){
-    if(!STATE.ikdc[tp.key] && day >= tp.day - IKDC_WINDOW_OPEN_DAYS) return tp;
-  }
-  return null;
+  return IKDC_TIMEPOINTS.find(tp => ikdcStatus(tp) === 'open') || null;
 }
 function computeIkdcScore(answers){
   let sum = 0, count = 0;
@@ -1208,35 +1288,53 @@ let ikdcFormKey = null;
 let ikdcAnswers = {};
 
 function renderIkdcCard(){
+  renderIkdcHomeNudge();
+  renderIkdcProgress();
+}
+// Home only carries a small reminder; the survey itself lives on Progress.
+function renderIkdcHomeNudge(){
   const c = CONTENT[STATE.lang];
   const wrap = document.getElementById('ikdc-wrap');
   if(!wrap) return;
+  const due = STATE.surgeryDate ? ikdcDueTimepoint() : null;
+  wrap.innerHTML = due ? `<div class="gate-card fail ikdc-nudge">
+      <div class="gate-title">${c.ikdcTitle}</div>
+      <div class="gate-sub">${c.ikdcHomeNudge(ikdcLabel(due.key))}</div>
+      <button class="primary-btn" data-action="switch-tab" data-tab="progress">${c.ikdcGoToProgress}</button>
+    </div>` : '';
+}
+function renderIkdcProgress(){
+  const c = CONTENT[STATE.lang];
+  const wrap = document.getElementById('ikdc-progress-wrap');
+  if(!wrap) return;
+  if(!STATE.surgeryDate){ wrap.innerHTML = ''; return; }
   const due = ikdcDueTimepoint();
+  const done = ikdcCompleted();
   let html = '';
   if(due){
-    const day = postopDay();
-    const overdue = day !== null && day > due.day + IKDC_WINDOW_OPEN_DAYS;
-    html += `<div class="gate-card fail">
-      <div class="gate-title">${c.ikdcTitle}</div>
-      <div class="gate-sub">${c.ikdcTimepointLabels[due.key]} — ${overdue ? c.ikdcOverdueNote : c.ikdcIntro}</div>
+    const w = ikdcWindow(due);
+    html += `<div class="card ikdc-due" id="ikdc-due-card">
+      <h2>${c.ikdcTitle} · ${ikdcLabel(due.key)}</h2>
+      <p class="muted">${c.ikdcIntro}</p>
+      <p class="ikdc-open-until">${c.ikdcOpenUntil(fmtShortDate(postopDayToISO(w.close)))}</p>
       <button class="primary-btn" data-action="open-ikdc-form" data-key="${due.key}">${c.ikdcOpenBtn}</button>
     </div>`;
   }
-  html += ikdcSyncStatusHtml();
-  html += ikdcHistoryHtml();
+  // Once this week's survey is done there's no survey button — just the
+  // latest result, what it suggests, and how things are progressing.
+  if(done.length) html += ikdcResultCardHtml(done[done.length-1], done);
+  html += ikdcTimelineHtml(done, !due && !done.length);
   wrap.innerHTML = html;
 }
+
 // Small status line for the most recent not-yet-confirmed submission.
 // Confirmed entries show nothing here — once acknowledged, there's nothing
 // left to communicate.
 function ikdcSyncStatusHtml(){
   const c = CONTENT[STATE.lang];
-  const pendingKeys = IKDC_TIMEPOINTS
-    .map(tp=>tp.key)
-    .filter(k => STATE.ikdc[k] && STATE.ikdc[k].syncStatus !== 'confirmed');
-  if(!pendingKeys.length) return '';
-  const mostRecent = pendingKeys[pendingKeys.length-1];
-  const entry = STATE.ikdc[mostRecent];
+  const pending = ikdcCompleted().filter(e => e.syncStatus !== 'confirmed');
+  if(!pending.length) return '';
+  const entry = pending[pending.length-1];
   const label = !isValidHn(STATE.hn) ? c.ikdcSyncNeedsHn
     : entry.syncStatus === 'retrying' ? c.ikdcSyncRetrying
     : c.ikdcSyncPending;
@@ -1244,16 +1342,71 @@ function ikdcSyncStatusHtml(){
     <span class="ikdc-sync-dot"></span>${label}
   </div>`;
 }
-function ikdcHistoryHtml(){
+
+// Suggestions come only from what the patient actually answered, plus the
+// change since their previous survey — no population norms.
+function ikdcSuggestions(entry, prev){
+  const t = CONTENT[STATE.lang].ikdcSuggest;
+  const a = entry.answers || {};
+  const tips = [];
+  const tp = IKDC_TIMEPOINTS.find(x => x.key === entry.key);
+  const weeks = tp ? tp.weeks : 99;
+  if(a.q6 === 0) tips.push(t.locking);                                   // knee locks or catches
+  if((typeof a.q2 === 'number' && a.q2 <= 3) || (typeof a.q3 === 'number' && a.q3 <= 3)) tips.push(t.pain); // frequent or severe pain
+  if(typeof a.q4 === 'number' && a.q4 <= 1) tips.push(t.swelling);      // very/extremely stiff or swollen
+  if(weeks >= 12 && a.q7 === 0) tips.push(t.givingWay);                  // gives way even with light activity (expected early on)
+  const diff = prev ? entry.score - prev.score : 0;
+  if(prev && diff <= -10) tips.push(t.dropped);
+  if(!tips.length) tips.push(prev && diff >= 5 ? t.improved : t.keepGoing);
+  return tips;
+}
+function ikdcResultCardHtml(entry, done){
   const c = CONTENT[STATE.lang];
-  const series = IKDC_TIMEPOINTS
-    .filter(tp => STATE.ikdc[tp.key])
-    .map(tp => ({ d: STATE.ikdc[tp.key].date, v: STATE.ikdc[tp.key].score }));
-  if(series.length < 2) return '';
-  const latest = series[series.length-1].v;
-  return `<div class="metric-card">
-    <div class="metric-top"><div class="metric-name">${c.ikdcHistoryTitle}</div><div class="metric-latest">${latest}</div></div>
-    ${sparkSvg(series, {target:100, better:'up', min:0, max:100})}
+  const idx = done.indexOf(entry);
+  const prev = idx > 0 ? done[idx-1] : null;
+  let change = '', changeCls = '';
+  if(prev){
+    const diff = entry.score - prev.score;
+    if(Math.abs(diff) < 3){ change = c.ikdcChangeSame(ikdcLabel(prev.key)); }
+    else if(diff > 0){ change = c.ikdcChangeUp(diff, ikdcLabel(prev.key)); changeCls = 'up'; }
+    else { change = c.ikdcChangeDown(-diff, ikdcLabel(prev.key)); changeCls = 'down'; }
+  }
+  const tips = ikdcSuggestions(entry, prev);
+  return `<div class="card ikdc-result" id="ikdc-result-card">
+    <div class="ikdc-result-head">${c.ikdcResultTitle(ikdcLabel(entry.key))} · ${fmtShortDate(entry.date)}</div>
+    <div class="ikdc-score"><span class="ikdc-score-num">${entry.score}</span><span class="ikdc-score-of">${c.ikdcScoreOutOf}</span></div>
+    ${change ? `<div class="ikdc-change ${changeCls}">${change}</div>` : ''}
+    <p class="muted ikdc-explain">${c.ikdcScoreExplain}</p>
+    ${ikdcSyncStatusHtml()}
+    <div class="ikdc-suggest-title">${c.ikdcSuggestTitle}</div>
+    <ul class="ikdc-suggest">${tips.map(tip => `<li>${tip}</li>`).join('')}</ul>
+    <p class="ikdc-foot">${c.ikdcSuggestFootnote}</p>
+  </div>`;
+}
+function ikdcTimelineHtml(done, showIntro){
+  const c = CONTENT[STATE.lang];
+  const rows = IKDC_TIMEPOINTS.map(tp => {
+    const status = ikdcStatus(tp);
+    const entry = STATE.ikdc[tp.key];
+    let right;
+    if(status === 'done') right = `<span class="ikdc-tl-score">${entry.score}</span><span class="ikdc-tl-sub">${fmtShortDate(entry.date)}</span>`;
+    else if(status === 'open') right = `<span class="ikdc-tl-open">${c.ikdcStatusOpen}</span>`;
+    else if(status === 'missed') right = `<span class="ikdc-tl-sub">${c.ikdcStatusMissed}</span>`;
+    else right = `<span class="ikdc-tl-sub">${c.ikdcStatusUpcoming(fmtShortDate(postopDayToISO(ikdcWindow(tp).open)))}</span>`;
+    return `<div class="ikdc-tl-row ${status}"><span class="ikdc-tl-dot"></span><span class="ikdc-tl-label">${ikdcLabel(tp.key)}</span><span class="ikdc-tl-right">${right}</span></div>`;
+  }).join('');
+  const series = done.map(e => ({ d: e.date, v: e.score }));
+  const chart = series.length >= 2 ? sparkSvg(series, {target:100, better:'up', min:0, max:100}) : '';
+  const next = IKDC_TIMEPOINTS.find(tp => ikdcStatus(tp) === 'upcoming');
+  const allDone = IKDC_TIMEPOINTS.every(tp => ikdcStatus(tp) === 'done');
+  const foot = next ? c.ikdcNextSurvey(ikdcLabel(next.key), fmtShortDate(postopDayToISO(ikdcWindow(next).open)))
+    : allDone ? c.ikdcAllDone : '';
+  return `<div class="card ikdc-timeline" id="ikdc-timeline">
+    <h2>${c.ikdcProgressTitle}</h2>
+    ${showIntro ? `<p class="muted">${c.ikdcIntro}</p>` : ''}
+    ${chart}
+    <div class="ikdc-tl">${rows}</div>
+    ${foot ? `<p class="muted ikdc-next">${foot}</p>` : ''}
   </div>`;
 }
 
@@ -1345,6 +1498,7 @@ async function submitIkdcForm(){
   saveState();
   closeIkdcForm();
   renderIkdcCard();
+  document.querySelector('main').scrollTop = 0; // result card is at the top of Progress
   await syncOneIkdc(key);
 }
 
@@ -1865,6 +2019,7 @@ function flagCardHtml(){
 
 function renderProgress(){
   const c = CONTENT[STATE.lang];
+  renderIkdcProgress();
   document.getElementById('gates-wrap').innerHTML =
       gateCardHtml("run", c.runGateTitle, c.runGateSub, 3)
     + gateCardHtml("rts", c.rtsGateTitle, c.rtsGateSub, 4);
@@ -1989,15 +2144,20 @@ function switchTab(tab){
     currentExPhase = null; // always resync to the patient's actual current phase
     renderExercisePhaseTabs(); renderExerciseList();
   }
-  if(tab==='progress') renderProgress();
-  if(tab==='home') maybeAutoOpenIkdc();
+  if(tab==='progress'){ renderProgress(); maybeAutoOpenIkdc(); }
 }
+// Brings the survey up by itself once per timepoint, the first time the
+// patient opens Progress while it's open. After that the card's button is
+// enough — no nagging, and nothing ever pops up over Home.
 function maybeAutoOpenIkdc(){
   if(ikdcFormKey) return; // already open
   if(!document.getElementById('onboard').classList.contains('hidden')) return; // onboarding takes priority
   if(!document.getElementById('addhome-modal').classList.contains('hidden')) return;
   const due = ikdcDueTimepoint();
-  if(due) openIkdcForm(due.key);
+  if(!due || STATE.ikdcPrompted[due.key]) return;
+  STATE.ikdcPrompted[due.key] = true;
+  saveState();
+  openIkdcForm(due.key);
 }
 
 /* ============================= ONBOARD ============================= */
@@ -2204,6 +2364,5 @@ document.addEventListener('error', e => {
     openOnboard(true);
     document.getElementById('hn-validation').textContent = CONTENT[STATE.lang].hnMissingPrompt;
   }
-  maybeAutoOpenIkdc();
   trySyncPendingIkdc();
 })();
