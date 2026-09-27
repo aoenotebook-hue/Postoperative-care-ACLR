@@ -130,7 +130,7 @@ const ANSWER_TEXT = {
   diff:     { 4: 'No difficulty', 3: 'Minimal difficulty', 2: 'Moderate difficulty', 1: 'Extreme difficulty', 0: 'Unable to do' },
   lock:     { 1: 'No', 0: 'Yes' }
 };
-const TIMEPOINT_TEXT = { w2: '2 weeks', w6: '6 weeks', w12: '12 weeks', w25: '25 weeks (6 months)', w52: '52 weeks (1 year)' };
+const TIMEPOINT_TEXT = { w2: '2 weeks', w6: '6 weeks', w12: '12 weeks', w24: '24 weeks (6 months)', w25: '25 weeks', w52: '52 weeks (1 year)' };
 const GRAFT_TEXT = { unsure: 'Not sure', hamstring: 'Hamstring tendon', bpb: 'Patellar tendon (BTB)', quad: 'Quadriceps tendon', allograft: 'Donor graft (allograft)' };
 
 const COL_SCORE = 'IKDC score (0-100)';
@@ -168,7 +168,7 @@ const RATE_LIMIT_GLOBAL_MAX        = 60;    // blunt flood protection, not per-c
 
 /* ============================= SCHEMA — mirrors index.html, do not let it drift ============================= */
 
-const VALID_TIMEPOINTS = ['w2', 'w6', 'w12', 'w25', 'w52'];
+const VALID_TIMEPOINTS = ['w2', 'w6', 'w12', 'w24', 'w25', 'w52'];
 const VALID_GRAFTS = ['unsure', 'hamstring', 'bpb', 'quad', 'allograft'];
 const VALID_MENISCUS = ['protected', 'none'];
 
