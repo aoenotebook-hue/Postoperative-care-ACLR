@@ -1,10 +1,11 @@
 {
+  "id": "./",
   "name": "ผ่าตัดเอ็นไขว้หน้าเข่า",
-  "short_name": "ผ่าตัดเอ็นไขว้หน้าเข่า",
+  "short_name": "ดูแลเข่า ACL",
   "description": "คำแนะนำการดูแลตนเองหลังผ่าตัดสร้างเอ็นไขว้หน้าเข่า",
   "lang": "th",
   "dir": "ltr",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -24,7 +25,13 @@
       "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

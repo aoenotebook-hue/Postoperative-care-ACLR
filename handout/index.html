@@ -6,6 +6,7 @@
 <title>คู่มือเริ่มใช้แอป — ACL Recovery App</title>
 <style>
   @page { size: A4; margin: 14mm; }
+  @media print { body { zoom: 0.94; } }
   :root { --navy:#1F3864; --muted:#5B6474; --line:#D9DEE7; }
   * { box-sizing: border-box; }
   body { margin:0; background:#F3F5F8; font-family: "Sarabun","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif; color:#1C2330; }
@@ -16,6 +17,8 @@
   header img { width:64px; height:64px; }
   h1 { margin:0; font-size:24px; color:var(--navy); line-height:1.25; }
   .en { color:var(--muted); font-size:0.82em; font-weight:400; }
+  .how .ico { width:15px; height:15px; vertical-align:-2px; }
+  .how { display:block; margin-top:4px; font-size:13.5px; color:var(--navy); background:#EEF2F8; border-radius:8px; padding:5px 9px; }
   h1 .en { display:block; font-size:15px; margin-top:2px; }
 
   .lead { margin:14px 0 4px; font-size:17px; line-height:1.5; }
@@ -69,12 +72,13 @@
     </div>
 
     <ol class="steps">
-      <li>สแกน QR Code ด้วยกล้องมือถือ
-        <span class="en">Scan the QR code with your phone camera.</span></li>
-      <li>กรอก<strong>วันที่ผ่าตัด</strong>และ<strong>หมายเลข HN</strong> ของท่าน (ดูได้จากบัตรโรงพยาบาลหรือใบนัด)
-        <span class="en">Enter your surgery date and your HN (on your hospital card or appointment slip).</span></li>
-      <li>กด “เพิ่มลงหน้าจอหลัก” เพื่อเปิดแอปได้ในแตะเดียว
-        <span class="en">Tap “Add to Home Screen” for one-tap access.</span></li>
+      <li>สแกน QR Code ด้วยกล้องมือถือ แล้วแตะลิงก์ที่ขึ้นมา
+        <span class="en">Scan the QR code with your phone camera, then tap the link.</span></li>
+      <li><strong>เพิ่มแอปลงหน้าจอหลัก</strong> — แตะแถบสีเขียว “เพิ่มแอปลงหน้าจอหลักก่อน” แล้วทำตามภาพในแอป
+        <span class="en">Add the app to your Home Screen: tap the green “Add to your Home Screen first” bar and follow the pictures.</span>
+        <span class="how">iPhone: Safari → ปุ่มแชร์ <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-label="Share"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M7 10H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-1"/></svg> → “เพิ่มไปยังหน้าจอโฮม” &nbsp;·&nbsp; Android: Chrome → เมนู <b>⋮</b> → “ติดตั้งแอป”</span></li>
+      <li>เปิดแอปจากไอคอนใหม่ แล้วกรอก<strong>วันที่ผ่าตัด</strong>และ<strong>หมายเลข HN</strong> (ดูได้จากบัตรโรงพยาบาลหรือใบนัด)
+        <span class="en">Open the app from the new icon, then enter your surgery date and HN (on your hospital card or appointment slip).</span></li>
     </ol>
   </section>
 

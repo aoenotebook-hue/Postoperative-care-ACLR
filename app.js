@@ -50,13 +50,63 @@ en: {
   hnRequiredValidation:"Please enter your HN — you'll find it on your hospital card or appointment slip.",
   hnMissingPrompt:"Please add your HN so your results can reach your care team.",
   dateRangeValidation:"Please check that date — it should be within the last 5 years and no more than a year from now.",
-  addHomeTitle:"Add to Home Screen?",
-  addHomeBody:"Add this app to your home screen for one-tap access anytime, just like a regular app.",
+  addHomeTitle:"Add to Home Screen",
   addHomeAccept:"Add to Home Screen",
-  addHomeDecline:"Not Now",
+  addHomeDecline:"Not now",
   addHomeGotIt:"Got it",
-  addHomeIOSSteps:"Tap the Share icon in your browser, then choose \"Add to Home Screen.\"",
-  addHomeGenericSteps:"Look for \"Add to Home Screen\" or \"Install App\" in your browser's menu.",
+  closeLabel:"Close",
+  installLink:"📲 Add this app to your Home Screen",
+  installBannerTitle:"Add to your Home Screen first",
+  installBannerSub:"Then open the app from its new icon. It takes under a minute.",
+  installCardTitle:"Add the app to your Home Screen",
+  installCardSub:"Open it with one tap, like any other app. No app store needed.",
+  installCardBtn:"Show me how",
+  installCardHide:"Hide this",
+  installGuide:{
+    lead:"Open the app with one tap, just like any other app. No app store or sign-up needed.",
+    desktopLead:"This is easiest on your phone: scan the QR code on your handout, then tap the 📲 link at the bottom of Home. On a computer:",
+    after:"An icon will appear on your home screen. From now on, open the app from that icon.",
+    done:"Done! Look for the “ดูแลเข่า ACL” icon on your home screen and open the app from there from now on.",
+    iosNewStart:"iPhone keeps the home-screen app separate from Safari. The first time you open it from the new icon, enter your surgery date and HN again.",
+    showSteps:"Didn't work? Show me the steps",
+    thisApp:"another app",
+    inAppLead:(name, browser)=>`This page is open inside ${name}, which can't add apps to your home screen. Open it in ${browser} first.`,
+    openIn:browser=>`Open in ${browser}`,
+    copyLink:"Copy link",
+    ifButtonFails:"If the button doesn't work:",
+    copied:"Link copied. Open your browser and paste it into the address bar.",
+    steps:{
+      iosSafari:[
+        ui=>`Tap the Share button ${ui('share')} in Safari's toolbar.<span class="alt">Don't see it? Tap ${ui('more')} first, then ${ui('share','Share')}.</span>`,
+        ui=>`Scroll down and tap ${ui('plus','Add to Home Screen')}.`,
+        ui=>`Tap ${ui('','Add')} at the top right.`
+      ],
+      iosOther:[
+        ui=>`Tap the Share button ${ui('share')}. In Chrome it's at the top right, next to the address bar.<span class="alt">In Firefox: tap ${ui('menu')}, then ${ui('share','Share')}.</span>`,
+        ui=>`Tap ${ui('plus','Add to Home Screen')}.<span class="alt">Not in the list? Open this page in Safari and follow the steps there.</span>`,
+        ui=>`Tap ${ui('','Add')}.`
+      ],
+      android:[
+        ui=>`Tap the menu ${ui('dots')} at the top right of Chrome.`,
+        ui=>`Tap ${ui('plus','Add to Home screen')} or ${ui('','Install app')}.`,
+        ui=>`Tap ${ui('','Install')} or ${ui('','Add')} to confirm.`
+      ],
+      androidSamsung:[
+        ui=>`Tap the menu ${ui('menu')} at the bottom right.`,
+        ui=>`Tap ${ui('plus','Add page to')}, then ${ui('','Home screen')}.`,
+        ui=>`Tap ${ui('','Add')}.`
+      ],
+      inApp:[
+        ui=>`Tap ${ui('more')} or ${ui('share')} (usually at the top or bottom right).`,
+        ui=>`Choose ${ui('','Open in Safari')} or ${ui('','Open in browser')}.`,
+        ui=>`Then tap “📲 Add to Home Screen” there and follow the steps.`
+      ],
+      desktop:[
+        ui=>`In Chrome or Edge, click the install icon ${ui('plus')} at the right end of the address bar.`,
+        ui=>`Click ${ui('','Install')}.`
+      ]
+    }
+  },
   noDateChip:"Set your surgery date",
   noDateDesc:"Tap \"Edit your surgery details\" above so we can show your current recovery phase.",
   callBtnPrefix:"For appointment — Call ",
@@ -512,13 +562,63 @@ th: {
   hnRequiredValidation:"กรุณากรอกหมายเลข HN ดูได้จากบัตรโรงพยาบาลหรือใบนัดของท่าน",
   hnMissingPrompt:"กรุณาเพิ่มหมายเลข HN เพื่อให้ผลการประเมินของท่านส่งถึงทีมผู้ดูแลได้",
   dateRangeValidation:"กรุณาตรวจสอบวันที่อีกครั้ง ควรอยู่ภายใน 5 ปีที่ผ่านมา และไม่เกิน 1 ปีข้างหน้า",
-  addHomeTitle:"เพิ่มลงหน้าจอหลักหรือไม่?",
-  addHomeBody:"เพิ่มแอปนี้ลงหน้าจอหลักของท่าน เพื่อเปิดใช้งานได้ทันทีเหมือนแอปทั่วไป",
+  addHomeTitle:"เพิ่มแอปลงหน้าจอหลัก",
   addHomeAccept:"เพิ่มลงหน้าจอหลัก",
   addHomeDecline:"ไว้ภายหลัง",
-  addHomeGotIt:"รับทราบ",
-  addHomeIOSSteps:"แตะไอคอนแชร์ในเบราว์เซอร์ แล้วเลือก \"เพิ่มไปยังหน้าจอโฮม\"",
-  addHomeGenericSteps:"มองหาเมนู \"เพิ่มลงหน้าจอหลัก\" หรือ \"ติดตั้งแอป\" ในเบราว์เซอร์ของท่าน",
+  addHomeGotIt:"เข้าใจแล้ว",
+  closeLabel:"ปิด",
+  installLink:"📲 เพิ่มแอปนี้ลงหน้าจอหลัก",
+  installBannerTitle:"เพิ่มแอปลงหน้าจอหลักก่อน",
+  installBannerSub:"แล้วเปิดแอปจากไอคอนใหม่ ใช้เวลาไม่ถึง 1 นาที",
+  installCardTitle:"เพิ่มแอปลงหน้าจอหลัก",
+  installCardSub:"แตะครั้งเดียวก็เปิดได้เหมือนแอปทั่วไป ไม่ต้องดาวน์โหลดจาก App Store",
+  installCardBtn:"ดูวิธีทำ",
+  installCardHide:"ซ่อน",
+  installGuide:{
+    lead:"เปิดแอปได้ในแตะเดียวเหมือนแอปทั่วไป ไม่ต้องดาวน์โหลดหรือสมัครสมาชิก",
+    desktopLead:"ทำบนมือถือจะง่ายที่สุด: สแกน QR Code ในเอกสารแนะนำ แล้วแตะลิงก์ 📲 ด้านล่างหน้าแรก หากใช้คอมพิวเตอร์:",
+    after:"ไอคอนแอปจะปรากฏบนหน้าจอหลัก ครั้งต่อไปให้เปิดแอปจากไอคอนนั้น",
+    done:"เรียบร้อย! มองหาไอคอน “ดูแลเข่า ACL” บนหน้าจอหลัก และเปิดแอปจากไอคอนนั้นตั้งแต่นี้ไป",
+    iosNewStart:"iPhone แยกข้อมูลของแอปบนหน้าจอหลักออกจาก Safari เมื่อเปิดจากไอคอนใหม่ครั้งแรก กรุณากรอกวันที่ผ่าตัดและ HN อีกครั้ง",
+    showSteps:"ไม่ได้ผล? ดูวิธีทำทีละขั้น",
+    thisApp:"แอปอื่น",
+    inAppLead:(name, browser)=>`ตอนนี้หน้านี้เปิดอยู่ใน ${name} ซึ่งเพิ่มแอปลงหน้าจอหลักไม่ได้ กรุณาเปิดใน ${browser} ก่อน`,
+    openIn:browser=>`เปิดใน ${browser}`,
+    copyLink:"คัดลอกลิงก์",
+    ifButtonFails:"หากกดปุ่มแล้วไม่ได้ผล:",
+    copied:"คัดลอกลิงก์แล้ว เปิดเบราว์เซอร์แล้ววางในช่องที่อยู่เว็บ",
+    steps:{
+      iosSafari:[
+        ui=>`แตะปุ่มแชร์ ${ui('share')} บนแถบเครื่องมือของ Safari<span class="alt">ไม่เห็นปุ่มนี้? แตะ ${ui('more')} ก่อน แล้วแตะ ${ui('share','แชร์')}</span>`,
+        ui=>`เลื่อนลงแล้วแตะ ${ui('plus','เพิ่มไปยังหน้าจอโฮม')}<span class="alt">หากเครื่องตั้งเป็นภาษาอังกฤษ: “Add to Home Screen”</span>`,
+        ui=>`แตะ ${ui('','เพิ่ม')} ที่มุมขวาบน<span class="alt">ภาษาอังกฤษ: “Add”</span>`
+      ],
+      iosOther:[
+        ui=>`แตะปุ่มแชร์ ${ui('share')} ใน Chrome จะอยู่มุมขวาบน ข้างช่องที่อยู่เว็บ<span class="alt">ใน Firefox: แตะ ${ui('menu')} แล้วแตะ ${ui('share','แชร์')}</span>`,
+        ui=>`แตะ ${ui('plus','เพิ่มไปยังหน้าจอโฮม')}<span class="alt">ไม่พบเมนูนี้? ให้เปิดหน้านี้ใน Safari แล้วทำตามขั้นตอนอีกครั้ง</span>`,
+        ui=>`แตะ ${ui('','เพิ่ม')}`
+      ],
+      android:[
+        ui=>`แตะเมนู ${ui('dots')} ที่มุมขวาบนของ Chrome`,
+        ui=>`แตะ ${ui('plus','เพิ่มลงในหน้าจอหลัก')} หรือ ${ui('','ติดตั้งแอป')}<span class="alt">ภาษาอังกฤษ: “Add to Home screen” หรือ “Install app”</span>`,
+        ui=>`แตะ ${ui('','ติดตั้ง')} หรือ ${ui('','เพิ่ม')} เพื่อยืนยัน`
+      ],
+      androidSamsung:[
+        ui=>`แตะเมนู ${ui('menu')} ที่มุมขวาล่าง`,
+        ui=>`แตะ ${ui('plus','เพิ่มหน้าไปยัง')} แล้วเลือก ${ui('','หน้าจอหลัก')}<span class="alt">ภาษาอังกฤษ: “Add page to” → “Home screen”</span>`,
+        ui=>`แตะ ${ui('','เพิ่ม')}`
+      ],
+      inApp:[
+        ui=>`แตะ ${ui('more')} หรือ ${ui('share')} (มักอยู่มุมขวาบนหรือขวาล่าง)`,
+        ui=>`เลือก ${ui('','เปิดใน Safari')} หรือ ${ui('','เปิดในเบราว์เซอร์')}`,
+        ui=>`จากนั้นแตะ “📲 เพิ่มแอปลงหน้าจอหลัก” แล้วทำตามขั้นตอน`
+      ],
+      desktop:[
+        ui=>`ใน Chrome หรือ Edge คลิกไอคอนติดตั้ง ${ui('plus')} ที่ด้านขวาของช่องที่อยู่เว็บ`,
+        ui=>`คลิก ${ui('','ติดตั้ง')}`
+      ]
+    }
+  },
   noDateChip:"กรุณาระบุวันที่ผ่าตัด",
   noDateDesc:"แตะ \"แก้ไขข้อมูลการผ่าตัดของท่าน\" ด้านบน เพื่อให้แอปแสดงระยะการฟื้นตัวปัจจุบันของท่าน",
   callBtnPrefix:"สำหรับนัดหมาย — โทร ",
@@ -1039,7 +1139,8 @@ let STATE = {
   flags:{},       // { runCleared:'yes', ... }
   ikdc:{},        // { w2:{date, answers, score, idempotencyKey, syncStatus, posted}, w6, w12, w24 }
   ikdcPrompted:{}, // { w2:true, ... } — survey already brought up automatically once
-  consentGiven:false, homeScreenPromptShown:false
+  consentGiven:false, homeScreenPromptShown:false,
+  installCardHidden:false, appInstalled:false
 };
 let currentExPhase = 0;
 
@@ -1158,10 +1259,35 @@ function currentPhaseIndex(offset){
 }
 
 /* ============================= ADD TO HOME SCREEN ============================= */
+// Each phone/browser adds web apps differently, so the guide shows only the
+// steps for the one the patient is holding. Android Chrome/Edge/Samsung can do
+// it in one tap (beforeinstallprompt); iPhone always needs the Share menu.
 let deferredInstallPrompt = null;
-const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredInstallPrompt = e; });
+const UA = navigator.userAgent || '';
+// iPadOS reports itself as a Mac; touch support gives it away.
+const IS_IOS = /iPad|iPhone|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+const IS_ANDROID = /Android/i.test(UA);
+const IS_PHONE = IS_IOS || IS_ANDROID;
+// In-app browsers (LINE, Facebook, Instagram...) cannot add to the home screen.
+const IN_APP_NAME = /\bLine\//i.test(UA) ? 'LINE'
+  : /FBAN|FBAV|FB_IAB|FBIOS|Messenger/i.test(UA) ? 'Facebook'
+  : /Instagram/i.test(UA) ? 'Instagram'
+  : /musical_ly|Bytedance|TikTok/i.test(UA) ? 'TikTok'
+  : (IS_ANDROID && /; wv\)/.test(UA)) ? 'app' : null;
+const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches
+  || window.matchMedia('(display-mode: fullscreen)').matches
+  || window.navigator.standalone === true;
+let installGuideView = 'main'; // 'main' | 'manual' | 'done'
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); deferredInstallPrompt = e;
+  if(!document.getElementById('addhome-modal').classList.contains('hidden')) renderInstallGuide();
+});
+window.addEventListener('appinstalled', ()=>{
+  deferredInstallPrompt = null;
+  STATE.appInstalled = true; saveState();
+  renderInstallEntryPoints();
+  if(!document.getElementById('addhome-modal').classList.contains('hidden')){ installGuideView = 'done'; renderInstallGuide(); }
+});
 // Offline support + reliable Android install. Service workers need a secure
 // origin, so this is skipped when the app is opened as a local file.
 if('serviceWorker' in navigator && window.isSecureContext && location.protocol !== 'file:'){
@@ -1169,28 +1295,138 @@ if('serviceWorker' in navigator && window.isSecureContext && location.protocol !
     navigator.serviceWorker.register('sw.js').catch(err => console.warn('Service worker registration failed:', err));
   });
 }
+function installPlatform(){
+  if(IN_APP_NAME) return 'inapp';
+  if(IS_IOS) return /CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(UA) ? 'iosOther' : 'iosSafari';
+  if(IS_ANDROID) return /SamsungBrowser/.test(UA) ? 'androidSamsung' : 'android';
+  return 'desktop';
+}
+const INSTALL_ICONS = {
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M7 10H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-1"/></svg>',
+  plus:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M12 8.5v7M8.5 12h7"/></svg>',
+  dots:  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>',
+  more:  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  menu:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
+};
+// A label styled like the button the patient has to find on screen.
+function uiChip(icon, label){ return `<span class="ui">${icon ? INSTALL_ICONS[icon] : ''}${label || ''}</span>`; }
+function openInBrowserUrl(){
+  if(IN_APP_NAME === 'LINE'){
+    const u = new URL(location.href); u.searchParams.set('openExternalBrowser', '1'); return u.href;
+  }
+  if(IS_ANDROID) return `intent://${location.host}${location.pathname}${location.search}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(location.href)};end`;
+  return null;
+}
+function renderInstallGuide(){
+  const c = CONTENT[STATE.lang];
+  const g = c.installGuide;
+  const box = document.getElementById('addhome-content');
+  const x = document.querySelector('#addhome-modal .addhome-x');
+  if(x) x.setAttribute('aria-label', c.closeLabel);
+  if(!box) return;
+  const platform = installPlatform();
+  const steps = list => `<ol class="addhome-steps">${list.map(f => `<li>${f(uiChip)}</li>`).join('')}</ol>`;
+  const iosNote = IS_IOS && STATE.surgeryDate ? `<p class="addhome-note">${g.iosNewStart}</p>` : '';
+  let html;
+  if(installGuideView === 'done'){
+    html = `<p class="addhome-done">${g.done}</p>${iosNote}
+      <button class="primary-btn" data-action="close-addhome">${c.addHomeGotIt}</button>`;
+  } else if(platform === 'inapp'){
+    const name = IN_APP_NAME === 'app' ? g.thisApp : IN_APP_NAME;
+    const browser = IS_IOS ? 'Safari' : 'Chrome';
+    const url = openInBrowserUrl();
+    html = `<p class="addhome-lead">${g.inAppLead(name, browser)}</p>
+      ${url ? `<button class="primary-btn" data-action="open-in-browser">${g.openIn(browser)}</button>` : ''}
+      ${!url || IS_IOS ? (url ? `<p class="addhome-or">${g.ifButtonFails}</p>` : '') + steps(g.steps.inApp) : ''}
+      <button class="secondary-btn" data-action="copy-app-link">${g.copyLink}</button>
+      <div class="addhome-copied" id="addhome-copied" aria-live="polite"></div>
+      <button class="skip-link" data-action="close-addhome">${c.addHomeDecline}</button>`;
+  } else if(deferredInstallPrompt && installGuideView !== 'manual'){
+    html = `<p class="addhome-lead">${g.lead}</p>
+      <button class="primary-btn" data-action="accept-addhome">${c.addHomeAccept}</button>
+      <button class="skip-link" data-action="install-show-manual">${g.showSteps}</button>
+      <button class="skip-link" data-action="close-addhome">${c.addHomeDecline}</button>`;
+  } else {
+    html = `<p class="addhome-lead">${platform === 'desktop' ? g.desktopLead : g.lead}</p>
+      ${steps(g.steps[platform])}${iosNote}
+      <p class="addhome-done">${g.after}</p>
+      <button class="primary-btn" data-action="close-addhome">${c.addHomeGotIt}</button>`;
+  }
+  box.innerHTML = html;
+}
+function openInstallGuide(){
+  installGuideView = 'main';
+  STATE.homeScreenPromptShown = true; saveState();
+  renderInstallGuide();
+  const m = document.getElementById('addhome-modal');
+  m.classList.remove('hidden');
+  m.querySelector('.addhome-card').scrollTop = 0;
+}
+// Offered once, right after setup; afterwards the Home card / footer link stay available.
 function maybeShowAddHomePrompt(){
-  if(IS_STANDALONE || STATE.homeScreenPromptShown) return;
-  document.getElementById('addhome-steps').classList.add('hidden');
-  document.getElementById('addhome-buttons').classList.remove('hidden');
-  document.getElementById('addhome-modal').classList.remove('hidden');
+  if(IS_STANDALONE || STATE.homeScreenPromptShown || STATE.appInstalled) return;
+  if(!IS_PHONE && !deferredInstallPrompt) return;
+  openInstallGuide();
 }
 async function acceptAddHome(){
-  const c = CONTENT[STATE.lang];
-  if(deferredInstallPrompt){
-    deferredInstallPrompt.prompt();
-    try{ await deferredInstallPrompt.userChoice; }catch(e){}
-    deferredInstallPrompt = null;
-    closeAddHomePrompt();
-  } else {
-    document.getElementById('addhome-steps-text').textContent = IS_IOS ? c.addHomeIOSSteps : c.addHomeGenericSteps;
-    document.getElementById('addhome-steps').classList.remove('hidden');
-    document.getElementById('addhome-buttons').classList.add('hidden');
-  }
+  if(!deferredInstallPrompt){ installGuideView = 'manual'; renderInstallGuide(); return; }
+  const p = deferredInstallPrompt;
+  deferredInstallPrompt = null; // a prompt can only be used once
+  p.prompt();
+  let outcome = 'dismissed';
+  try{ outcome = (await p.userChoice).outcome; }catch(e){}
+  installGuideView = outcome === 'accepted' ? 'done' : 'manual';
+  renderInstallGuide();
 }
 function closeAddHomePrompt(){
   STATE.homeScreenPromptShown = true; saveState();
   document.getElementById('addhome-modal').classList.add('hidden');
+}
+function openInExternalBrowser(){
+  const url = openInBrowserUrl();
+  if(url) location.href = url;
+}
+async function copyAppLink(){
+  const g = CONTENT[STATE.lang].installGuide;
+  const link = location.origin + location.pathname;
+  const out = document.getElementById('addhome-copied');
+  try{
+    await navigator.clipboard.writeText(link);
+    out.textContent = g.copied;
+  }catch(e){
+    out.textContent = link; // clipboard blocked (common in in-app browsers): show it to copy by hand
+  }
+}
+function hideInstallCard(){
+  STATE.installCardHidden = true; saveState();
+  renderInstallEntryPoints();
+}
+// Home card (until hidden), a footer link (always, so it can be found again)
+// and a banner on the first setup screen (iPhone keeps the home-screen app's
+// data separate from Safari's, so adding it before setup saves typing twice).
+function renderInstallEntryPoints(){
+  const c = CONTENT[STATE.lang];
+  const canInstall = !IS_STANDALONE && !STATE.appInstalled;
+  const wrap = document.getElementById('install-wrap');
+  if(wrap){
+    wrap.innerHTML = canInstall && IS_PHONE && STATE.surgeryDate && !STATE.installCardHidden ? `<div class="gate-card pass">
+        <div class="install-card">
+          <img src="apple-touch-icon.png" alt="" width="48" height="48">
+          <div class="install-text">
+            <div class="gate-title">${c.installCardTitle}</div>
+            <div class="gate-sub">${c.installCardSub}</div>
+          </div>
+        </div>
+        <div class="install-card-actions">
+          <button class="primary-btn" data-action="open-install">${c.installCardBtn}</button>
+          <button class="install-hide" data-action="hide-install-card">${c.installCardHide}</button>
+        </div>
+      </div>` : '';
+  }
+  const link = document.getElementById('install-footer-link');
+  if(link) link.classList.toggle('hidden', !canInstall);
+  const banner = document.getElementById('onboard-install');
+  if(banner) banner.classList.toggle('hidden', !(canInstall && IS_PHONE && !STATE.surgeryDate));
 }
 
 /* ============================= IKDC SUBJECTIVE KNEE EVALUATION =============================
@@ -2251,6 +2487,7 @@ function saveOnboard(){
 function renderAll(){
   applyStaticI18n();
   renderHome();
+  renderInstallEntryPoints();
   renderCare();
   renderExercisePhaseTabs();
   renderExerciseList();
@@ -2314,6 +2551,11 @@ const ACTIONS = {
   'save-onboard':      ()   => saveOnboard(),
   'close-addhome':     ()   => closeAddHomePrompt(),
   'accept-addhome':    ()   => acceptAddHome(),
+  'open-install':      ()   => openInstallGuide(),
+  'install-show-manual':()  => { installGuideView = 'manual'; renderInstallGuide(); },
+  'open-in-browser':   ()   => openInExternalBrowser(),
+  'copy-app-link':     ()   => copyAppLink(),
+  'hide-install-card': ()   => hideInstallCard(),
   'submit-ikdc':       ()   => submitIkdcForm(),
   'close-ikdc':        ()   => closeIkdcForm(),
   'close-video-modal': ()   => closeVideoModal(),
